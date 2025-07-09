@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>高雄學生社團活動行事曆</title>
+  <style>
+    body {
+      font-family: "Noto Sans TC", sans-serif;
+      margin: 0;
+      background: #f0f4f8;
+      line-height: 1.6; /* Enhance readability */
+    }
+    header, footer {
+      background: #1976d2;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+    }
+    header h1 {
+        margin: 0;
+        font-size: 1.8rem; /* Adjust for mobile */
+    }
+    .top-right-controls {
+      position: fixed;
+      top: 0.5rem; /* Closer to top edge */
+      right: 0.5rem; /* Closer to right edge */
+      display: flex;
+      flex-wrap: wrap; /* Allow buttons to wrap */
+      gap: 5px; /* Smaller gap for mobile */
+      z-index: 1000; /* Ensure it stays on top */
+    }
+    .top-right-controls button {
+      background: #42a5f5;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem; /* Smaller padding */
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem; /* Smaller font size */
+    }
+    .top-right-controls button.logout {
+      background: #ef5350;
+    }
+    .content {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    /* Calendar controls */
+    .controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    .controls button {
+        background: #0277bd;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+        flex-shrink: 0; /* Prevent buttons from shrinking */
+    }
+    #month-year {
+        text-align: center;
+        flex-grow: 1; /* Allows month/year to take available space */
+        font-size: 1.5rem; /* Adjust for mobile */
+        margin: 0 10px; /* Spacing */
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      background-color: #cfd8dc;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 1rem; /* Adjust margin */
+    }
+    .header {
+      font-weight: bold;
+      text-align: center;
+      padding: 8px 0; /* Smaller padding */
+      background-color: #e1f5fe;
+      color: #0277bd;
+      font-size: 0.85rem; /* Smaller font for day names */
+    }
+    .day {
+      background: #ffffff;
+      min-height: 80px; /* Smaller min-height for mobile */
+      padding: 6px; /* Smaller padding */
+      border: 1px solid #cfd8dc;
+      position: relative;
+      transition: all 0.2s ease-in-out;
+      cursor: pointer;
+      font-size: 0.8rem; /* Smaller font for day content */
+    }
+    .day:hover {
+      background: #e3f2fd;
+    }
+    .day.has-event {
+      background: #fff3e0;
+      border-left: 4px solid #fb8c00;
+    }
+    .day .date-number {
+      font-weight: bold;
+      font-size: 1em; /* Relative to parent .day font-size */
+      color: #1976d2;
+      margin-bottom: 2px; /* Smaller margin */
+    }
+    .day .event-info {
+      font-size: 0.7em; /* Smaller font for event title */
+      background: #fb8c00;
+      color: white;
+      border-radius: 3px; /* Smaller border-radius */
+      padding: 1px 4px; /* Smaller padding */
+      display: block;
+      margin-top: 4px; /* Smaller margin */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .add-event-box, .login-register-modal {
+      background: #fff8e1;
+      padding: 1em;
+      border: 1px solid #ffe082;
+      border-radius: 8px;
+      margin-top: 1.5em; /* Adjust margin */
+      display: none;
+    }
+    .add-event-box input, .login-register-modal input, .add-event-box textarea {
+      width: 100%;
+      padding: 0.5em;
+      margin: 0.4em 0; /* Smaller vertical margin */
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.95rem; /* Adjust font size */
+    }
+    .add-event-box input[type="file"] {
+        padding: 0.2em;
+    }
+    .add-event-box button, .login-register-modal button {
+      background: #1976d2;
+      color: white;
+      border: none;
+      padding: 0.5em 1em;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 0.5em;
+      font-size: 1rem; /* Adjust font size */
+    }
+    .login-register-modal button.secondary {
+      background: #90a4ae;
+    }
+
+    /* Modal Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1001; /* Higher z-index to cover top-right-controls */
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+      padding-top: 20px; /* Adjust padding for mobile */
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 15px; /* Smaller padding */
+      border: 1px solid #888;
+      width: 90%; /* Wider on mobile */
+      max-width: 400px; /* Max width for larger phones */
+      border-radius: 10px;
+      position: relative;
+    }
+    .close-button {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .close-button:hover,
+    .close-button:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .auth-message {
+      color: red;
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+
+    /* Event Detail Box */
+    .event-detail-box {
+      background: #e0f2f7;
+      padding: 1em; /* Smaller padding */
+      border: 1px solid #b3e5fc;
+      border-radius: 8px;
+      margin-top: 1.5em; /* Adjust margin */
+      display: none;
+      font-size: 0.95rem; /* Adjust font size */
+    }
+    .event-detail-box h3 {
+      color: #0277bd;
+      margin-top: 0;
+      font-size: 1.3rem; /* Adjust heading size */
+    }
+    .event-detail-box p {
+      margin-bottom: 0.4em; /* Smaller margin */
+    }
+    .event-detail-box img {
+      max-width: 100%;
+      height: auto;
+      margin-top: 0.8em; /* Smaller margin */
+      border-radius: 8px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .poster-preview {
+        max-width: 120px; /* Smaller preview for mobile */
+        max-height: 120px;
+        display: block;
+        margin-top: 8px; /* Smaller margin */
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    /* --- Media Queries for smaller screens (e.g., phones) --- */
+    @media (max-width: 768px) {
+        .content {
+            margin: 1rem auto; /* Smaller margin on smaller screens */
+            padding: 0.8rem;
+        }
+        header h1 {
+            font-size: 1.5rem;
+        }
+        .top-right-controls {
+            top: 0.3rem;
+            right: 0.3rem;
+            flex-direction: column; /* Stack buttons vertically */
+            align-items: flex-end; /* Align to the right */
+            gap: 3px;
+        }
+        .top-right-controls button {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+        }
+
+        .controls {
+            flex-wrap: wrap; /* Allow controls to wrap */
+            justify-content: center; /* Center controls when wrapped */
+            gap: 10px; /* Gap between buttons and month */
+        }
+        .controls button {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+        }
+        #month-year {
+            font-size: 1.3rem;
+            width: 100%; /* Take full width when wrapped */
+            order: -1; /* Move to top of controls when wrapped */
+            margin-bottom: 0.5rem; /* Add space below month/year */
+        }
+
+        .calendar .header, .calendar .day {
+            min-height: 60px; /* Even smaller height for calendar cells */
+            padding: 4px; /* Even smaller padding */
+            font-size: 0.75rem; /* Smaller font in cells */
+        }
+        .day .date-number {
+            font-size: 0.9em;
+        }
+        .day .event-info {
+            font-size: 0.65em;
+            padding: 1px 3px;
+        }
+
+        .modal-content {
+            width: 95%; /* Even wider on very small screens */
+            padding: 10px;
+        }
+        .add-event-box input, .add-event-box textarea,
+        .event-detail-box p, .event-detail-box h3 {
+            font-size: 0.9rem; /* Slightly smaller font for forms and details */
+        }
+        .add-event-box button {
+            padding: 0.4em 0.8em;
+            font-size: 0.9rem;
+        }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-right-controls" id="top-right-controls">
+    <button id="login-btn" onclick="openLoginModal()">登入</button>
+    <button id="register-btn" onclick="openRegisterModal()">註冊</button>
+    <button id="logout-btn" onclick="logout()" class="logout" style="display:none;">登出</button>
+  </div>
+
+  <header>
+    <h1>高雄學生社團活動行事曆</h1>
+  </header>
+  <div class="content">
+    <div class="controls">
+      <button onclick="prevMonth()">⬅️ 上個月</button>
+      <h2 id="month-year"></h2>
+      <button onclick="nextMonth()">➡️ 下個月</button>
+    </div>
+    <div class="calendar" id="calendar"></div>
+
+    <div class="event-detail-box" id="event-detail-box">
+      <h3>活動詳細資訊</h3>
+      <p><strong>活動名稱:</strong> <span id="detail-title"></span></p>
+      <p><strong>活動日期和時間:</strong> <span id="detail-datetime"></span></p>
+      <p><strong>活動地點:</strong> <span id="detail-location"></span></p>
+      <p><strong>主辦社團:</strong> <span id="detail-organizer"></span></p>
+      <p><strong>社團簡介:</strong> <span id="detail-organizer-intro"></span></p>
+      <p><strong>活動介紹:</strong> <span id="detail-description"></span></p>
+      <p><strong>聯絡方式:</strong> <span id="detail-contact"></span></p>
+      <div id="detail-poster-container" style="display:none;">
+        <p><strong>活動海報/圖片:</strong></p>
+        <img id="detail-poster" src="" alt="活動海報">
+      </div>
+    </div>
+
+    <div class="add-event-box" id="add-event-box">
+      <h3>新增活動</h3>
+      <input type="text" id="event-title" placeholder="活動名稱">
+      <input type="datetime-local" id="event-datetime">
+      <input type="text" id="event-location" placeholder="活動地點">
+      <input type="text" id="event-organizer" placeholder="主辦社團名稱">
+      <textarea id="event-organizer-intro" placeholder="主辦社團簡介 (可選)"></textarea>
+      <textarea id="event-description" placeholder="活動介紹"></textarea>
+      <input type="text" id="event-contact" placeholder="聯絡方式 (Email 或社團負責人)">
+      <div>
+        <label for="event-poster-file">活動海報或圖片 (可選):</label>
+        <input type="file" id="event-poster-file" accept="image/*" onchange="previewPoster(event)">
+        <img id="poster-preview-img" class="poster-preview" style="display:none;">
+      </div>
+      <button onclick="addEvent()">新增活動</button>
+    </div>
+  </div>
+  <footer>
+    <p>&copy; 2025 高雄學生社團網站</p>
+  </footer>
+
+  <div id="login-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeModal('login-modal')">&times;</span>
+      <h3>登入</h3>
+      <input type="text" id="login-username" placeholder="帳號">
+      <input type="password" id="login-password" placeholder="密碼">
+      <button onclick="login()">登入</button>
+      <p id="login-message" class="auth-message"></p>
+    </div>
+  </div>
+
+  <div id="register-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeModal('register-modal')">&times;</span>
+      <h3>註冊新帳號</h3>
+      <input type="text" id="register-username" placeholder="帳號">
+      <input type="password" id="register-password" placeholder="密碼">
+      <button onclick="register()">註冊</button>
+      <p id="register-message" class="auth-message"></p>
+    </div>
+  </div>
+
+  <script>
+    const calendar = document.getElementById("calendar");
+    const monthYear = document.getElementById("month-year");
+    let current = new Date();
+
+    const events = JSON.parse(localStorage.getItem("events")) || [
+      {
+        date: "2025-07-15",
+        time: "10:00",
+        title: "社團博覽會",
+        location: "綜合體育館",
+        organizer: "學務處",
+        organizerIntro: "負責學生社團事務與活動。",
+        description: "集結校內各類社團，提供新生了解與選擇加入的機會。",
+        contact: "studentaffairs@example.com",
+        poster: ""
+      },
+      {
+        date: "2025-07-22",
+        time: "14:30",
+        title: "志工說明會",
+        location: "行政大樓B1會議室",
+        organizer: "服務學習社",
+        organizerIntro: "致力於推廣志願服務精神的學生社團。",
+        description: "介紹校內外志工服務機會，歡迎有熱忱的同學參與。",
+        contact: "service.learning@example.com",
+        poster: ""
+      },
+      {
+        date: "2025-08-05",
+        time: "19:00",
+        title: "新生迎新晚會",
+        location: "大禮堂",
+        organizer: "學生會",
+        organizerIntro: "代表全體學生權益，舉辦各項校園活動。",
+        description: "歡迎新同學加入高雄大學，準備了豐富的表演和互動環節。",
+        contact: "studentunion@example.com",
+        poster: ""
+      }
+    ];
+
+    const loginBtn = document.getElementById("login-btn");
+    const registerBtn = document.getElementById("register-btn");
+    const logoutBtn = document.getElementById("logout-btn");
+    const loginModal = document.getElementById("login-modal");
+    const registerModal = document.getElementById("register-modal");
+    const loginUsernameInput = document.getElementById("login-username");
+    const loginPasswordInput = document.getElementById("login-password");
+    const registerUsernameInput = document.getElementById("register-username");
+    const registerPasswordInput = document.getElementById("register-password");
+    const loginMessage = document.getElementById("login-message");
+    const registerMessage = document.getElementById("register-message");
+    const addEventBox = document.getElementById("add-event-box");
+
+    const eventDetailBox = document.getElementById("event-detail-box");
+    const detailTitle = document.getElementById("detail-title");
+    const detailDatetime = document.getElementById("detail-datetime");
+    const detailLocation = document.getElementById("detail-location");
+    const detailOrganizer = document.getElementById("detail-organizer");
+    const detailOrganizerIntro = document.getElementById("detail-organizer-intro");
+    const detailDescription = document.getElementById("detail-description");
+    const detailContact = document.getElementById("detail-contact");
+    const detailPosterContainer = document.getElementById("detail-poster-container");
+    const detailPoster = document.getElementById("detail-poster");
+
+    const eventPosterFileInput = document.getElementById("event-poster-file");
+    const posterPreviewImg = document.getElementById("poster-preview-img");
+    let currentPosterBase64 = "";
+
+    const users = JSON.parse(localStorage.getItem("users")) || {};
+
+    checkLoginStatus();
+
+    function checkLoginStatus() {
+      const isLoggedIn = localStorage.getItem("loggedInUser");
+      if (isLoggedIn) {
+        loginBtn.style.display = "none";
+        registerBtn.style.display = "none";
+        logoutBtn.style.display = "block";
+        addEventBox.style.display = "block";
+      } else {
+        loginBtn.style.display = "block";
+        registerBtn.style.display = "block";
+        logoutBtn.style.display = "none";
+        addEventBox.style.display = "none";
+      }
+    }
+
+    function openLoginModal() {
+      loginModal.style.display = "block";
+      loginMessage.textContent = "";
+      loginUsernameInput.value = "";
+      loginPasswordInput.value = "";
+    }
+
+    function openRegisterModal() {
+      registerModal.style.display = "block";
+      registerMessage.textContent = "";
+      registerUsernameInput.value = "";
+      registerPasswordInput.value = "";
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = "none";
+    }
+
+    window.onclick = function(event) {
+      if (event.target == loginModal) {
+        loginModal.style.display = "none";
+      }
+      if (event.target == registerModal) {
+        registerModal.style.display = "none";
+      }
+    }
+
+    function login() {
+      const username = loginUsernameInput.value;
+      const password = loginPasswordInput.value;
+
+      if (users[username] && users[username] === password) {
+        localStorage.setItem("loggedInUser", username);
+        loginMessage.textContent = "";
+        alert("登入成功！");
+        closeModal('login-modal');
+        checkLoginStatus();
+      } else {
+        loginMessage.textContent = "帳號或密碼錯誤。";
+      }
+    }
+
+    function register() {
+      const username = registerUsernameInput.value;
+      const password = registerPasswordInput.value;
+
+      if (!username || !password) {
+        registerMessage.textContent = "請輸入帳號和密碼。";
+        return;
+      }
+
+      if (users[username]) {
+        registerMessage.textContent = "此帳號已被註冊。";
+      } else {
+        users[username] = password;
+        localStorage.setItem("users", JSON.stringify(users));
+        registerMessage.textContent = "";
+        alert("註冊成功！請登入。");
+        closeModal('register-modal');
+        openLoginModal();
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("loggedInUser");
+      alert("已登出。");
+      checkLoginStatus();
+      eventDetailBox.style.display = "none";
+    }
+
+    function previewPoster(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                posterPreviewImg.src = e.target.result;
+                posterPreviewImg.style.display = "block";
+                currentPosterBase64 = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            posterPreviewImg.src = "";
+            posterPreviewImg.style.display = "none";
+            currentPosterBase64 = "";
+        }
+    }
+
+    function renderCalendar(date) {
+      calendar.innerHTML = "";
+      eventDetailBox.style.display = "none";
+
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      monthYear.textContent = `${year} 年 ${month + 1} 月`;
+
+      ["日", "一", "二", "三", "四", "五", "六"].forEach(day => {
+        const div = document.createElement("div");
+        div.className = "header";
+        div.textContent = day;
+        calendar.appendChild(div);
+      });
+
+      for (let i = 0; i < firstDay; i++) {
+        calendar.appendChild(document.createElement("div"));
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const cell = document.createElement("div");
+        cell.className = "day";
+        const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+        const matches = events.filter(e => e.date === dateStr);
+
+        const label = document.createElement("div");
+        label.className = "date-number";
+        label.textContent = d;
+        cell.prepend(label);
+
+        if (matches.length > 0) {
+          cell.classList.add("has-event");
+          matches.forEach(e => {
+            const tag = document.createElement("span");
+            tag.className = "event-info";
+            tag.textContent = e.title;
+            cell.appendChild(tag);
+          });
+          cell.onclick = () => displayEventDetails(matches[0]);
+        } else {
+            cell.onclick = () => eventDetailBox.style.display = "none";
+        }
+        calendar.appendChild(cell);
+      }
+    }
+
+    function displayEventDetails(event) {
+        eventDetailBox.style.display = "block";
+        detailTitle.textContent = event.title || 'N/A';
+        detailDatetime.textContent = `${event.date} ${event.time || '未定'}`;
+        detailLocation.textContent = event.location || 'N/A';
+        detailOrganizer.textContent = event.organizer || 'N/A';
+        detailOrganizerIntro.textContent = event.organizerIntro || '無';
+        detailDescription.textContent = event.description || '無';
+        detailContact.textContent = event.contact || '無';
+
+        if (event.poster) {
+            detailPoster.src = event.poster;
+            detailPosterContainer.style.display = "block";
+        } else {
+            detailPoster.src = "";
+            detailPosterContainer.style.display = "none";
+        }
+    }
+
+    function prevMonth() {
+      current.setMonth(current.getMonth() - 1);
+      renderCalendar(current);
+    }
+
+    function nextMonth() {
+      current.setMonth(current.getMonth() + 1);
+      renderCalendar(current);
+    }
+
+    function addEvent() {
+      const title = document.getElementById("event-title").value;
+      const datetime = document.getElementById("event-datetime").value;
+      const location = document.getElementById("event-location").value;
+      const organizer = document.getElementById("event-organizer").value;
+      const organizerIntro = document.getElementById("event-organizer-intro").value;
+      const description = document.getElementById("event-description").value;
+      const contact = document.getElementById("event-contact").value;
+      const poster = currentPosterBase64;
+
+      if (title && datetime && location && organizer && description && contact) {
+        const [date, time] = datetime.split('T');
+        events.push({
+            date,
+            time,
+            title,
+            location,
+            organizer,
+            organizerIntro,
+            description,
+            contact,
+            poster
+        });
+        localStorage.setItem("events", JSON.stringify(events));
+        renderCalendar(current);
+        alert("活動新增成功！");
+        document.getElementById("event-title").value = "";
+        document.getElementById("event-datetime").value = "";
+        document.getElementById("event-location").value = "";
+        document.getElementById("event-organizer").value = "";
+        document.getElementById("event-organizer-intro").value = "";
+        document.getElementById("event-description").value = "";
+        document.getElementById("event-contact").value = "";
+        eventPosterFileInput.value = "";
+        posterPreviewImg.src = "";
+        posterPreviewImg.style.display = "none";
+        currentPosterBase64 = "";
+      } else {
+        alert("請填寫所有標記為必填的活動資訊！");
+      }
+    }
+
+    renderCalendar(current);
+  </script>
+</body>
+</html>
