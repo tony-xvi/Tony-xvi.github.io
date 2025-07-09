@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>高雄學生社團活動行事曆</title>
+  <style>
+    body {
+      font-family: "Noto Sans TC", sans-serif;
+      margin: 0;
+      background: #f0f4f8;
+    }
+    header, footer {
+      background: #1976d2;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+    }
+    .top-right-controls {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      gap: 10px;
+    }
+    .top-right-controls button {
+      background: #42a5f5;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .top-right-controls button.logout {
+      background: #ef5350;
+    }
+    .content {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      background-color: #cfd8dc;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 2rem;
+    }
+    .header {
+      font-weight: bold;
+      text-align: center;
+      padding: 12px 0;
+      background-color: #e1f5fe;
+      color: #0277bd;
+    }
+    .day {
+      background: #ffffff;
+      min-height: 100px;
+      padding: 8px;
+      border: 1px solid #cfd8dc;
+      position: relative;
+      transition: all 0.2s ease-in-out;
+      cursor: pointer; /* Indicate clickable days */
+    }
+    .day:hover {
+      background: #e3f2fd;
+    }
+    .day.has-event {
+      background: #fff3e0;
+      border-left: 4px solid #fb8c00;
+    }
+    .day .date-number {
+      font-weight: bold;
+      font-size: 1.2em;
+      color: #1976d2;
+      margin-bottom: 4px;
+    }
+    .day .event-info {
+      font-size: 0.75em;
+      background: #fb8c00;
+      color: white;
+      border-radius: 4px;
+      padding: 2px 6px;
+      display: block;
+      margin-top: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .add-event-box, .login-register-modal {
+      background: #fff8e1;
+      padding: 1em;
+      border: 1px solid #ffe082;
+      border-radius: 8px;
+      margin-top: 2em;
+      display: none; /* Initially hidden */
+    }
+    .add-event-box input, .login-register-modal input, .add-event-box textarea {
+      width: 100%;
+      padding: 0.5em;
+      margin: 0.5em 0;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .add-event-box input[type="file"] {
+        padding: 0.2em; /* Adjust padding for file input */
+    }
+    .add-event-box button, .login-register-modal button {
+      background: #1976d2;
+      color: white;
+      border: none;
+      padding: 0.5em 1em;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 0.5em;
+    }
+    .login-register-modal button.secondary {
+      background: #90a4ae;
+    }
+
+    /* Modal Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+      padding-top: 60px;
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 500px;
+      border-radius: 10px;
+      position: relative;
+    }
+    .close-button {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .close-button:hover,
+    .close-button:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .auth-message {
+      color: red;
+      margin-top: 10px;
+    }
+
+    /* Event Detail Box */
+    .event-detail-box {
+      background: #e0f2f7;
+      padding: 1.5em;
+      border: 1px solid #b3e5fc;
+      border-radius: 8px;
+      margin-top: 2em;
+      display: none; /* Hidden by default */
+    }
+    .event-detail-box h3 {
+      color: #0277bd;
+      margin-top: 0;
+    }
+    .event-detail-box p {
+      margin-bottom: 0.5em;
+    }
+    .event-detail-box img {
+      max-width: 100%;
+      height: auto;
+      margin-top: 1em;
+      border-radius: 8px;
+      display: block; /* Ensures it takes up full width if available */
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .poster-preview {
+        max-width: 150px;
+        max-height: 150px;
+        display: block;
+        margin-top: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-right-controls" id="top-right-controls">
+    <button id="login-btn" onclick="openLoginModal()">登入</button>
+    <button id="register-btn" onclick="openRegisterModal()">註冊</button>
+    <button id="logout-btn" onclick="logout()" class="logout" style="display:none;">登出</button>
+  </div>
+
+  <header>
+    <h1>高雄學生社團活動行事曆</h1>
+  </header>
+  <div class="content">
+    <div class="controls">
+      <button onclick="prevMonth()">⬅️ 上個月</button>
+      <h2 id="month-year"></h2>
+      <button onclick="nextMonth()">➡️ 下個月</button>
+    </div>
+    <div class="calendar" id="calendar"></div>
+
+    <div class="event-detail-box" id="event-detail-box">
+      <h3>活動詳細資訊</h3>
+      <p><strong>活動名稱:</strong> <span id="detail-title"></span></p>
+      <p><strong>活動日期和時間:</strong> <span id="detail-datetime"></span></p>
+      <p><strong>活動地點:</strong> <span id="detail-location"></span></p>
+      <p><strong>主辦社團:</strong> <span id="detail-organizer"></span></p>
+      <p><strong>社團簡介:</strong> <span id="detail-organizer-intro"></span></p>
+      <p><strong>活動介紹:</strong> <span id="detail-description"></span></p>
+      <p><strong>聯絡方式:</strong> <span id="detail-contact"></span></p>
+      <div id="detail-poster-container" style="display:none;">
+        <p><strong>活動海報/圖片:</strong></p>
+        <img id="detail-poster" src="" alt="活動海報">
+      </div>
+    </div>
+
+    <div class="add-event-box" id="add-event-box">
+      <h3>新增活動</h3>
+      <input type="text" id="event-title" placeholder="活動名稱">
+      <input type="datetime-local" id="event-datetime">
+      <input type="text" id="event-location" placeholder="活動地點">
+      <input type="text" id="event-organizer" placeholder="主辦社團名稱">
+      <textarea id="event-organizer-intro" placeholder="主辦社團簡介 (可選)"></textarea>
+      <textarea id="event-description" placeholder="活動介紹"></textarea>
+      <input type="text" id="event-contact" placeholder="聯絡方式 (Email 或社團負責人)">
+      <div>
+        <label for="event-poster-file">活動海報或圖片 (可選):</label>
+        <input type="file" id="event-poster-file" accept="image/*" onchange="previewPoster(event)">
+        <img id="poster-preview-img" class="poster-preview" style="display:none;">
+      </div>
+      <button onclick="addEvent()">新增活動</button>
+    </div>
+  </div>
+  <footer>
+    <p>&copy; 2025 高雄學生社團網站</p>
+  </footer>
+
+  <div id="login-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeModal('login-modal')">&times;</span>
+      <h3>登入</h3>
+      <input type="text" id="login-username" placeholder="帳號">
+      <input type="password" id="login-password" placeholder="密碼">
+      <button onclick="login()">登入</button>
+      <p id="login-message" class="auth-message"></p>
+    </div>
+  </div>
+
+  <div id="register-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeModal('register-modal')">&times;</span>
+      <h3>註冊新帳號</h3>
+      <input type="text" id="register-username" placeholder="帳號">
+      <input type="password" id="register-password" placeholder="密碼">
+      <button onclick="register()">註冊</button>
+      <p id="register-message" class="auth-message"></p>
+    </div>
+  </div>
+
+  <script>
+    const calendar = document.getElementById("calendar");
+    const monthYear = document.getElementById("month-year");
+    let current = new Date();
+
+    // Sample Event Data (updated with more details, poster will be base64)
+    const events = JSON.parse(localStorage.getItem("events")) || [
+      {
+        date: "2025-07-15",
+        time: "10:00",
+        title: "社團博覽會",
+        location: "綜合體育館",
+        organizer: "學務處",
+        organizerIntro: "負責學生社團事務與活動。",
+        description: "集結校內各類社團，提供新生了解與選擇加入的機會。",
+        contact: "studentaffairs@example.com",
+        poster: "" // This will be a base64 string if uploaded
+      },
+      {
+        date: "2025-07-22",
+        time: "14:30",
+        title: "志工說明會",
+        location: "行政大樓B1會議室",
+        organizer: "服務學習社",
+        organizerIntro: "致力於推廣志願服務精神的學生社團。",
+        description: "介紹校內外志工服務機會，歡迎有熱忱的同學參與。",
+        contact: "service.learning@example.com",
+        poster: ""
+      },
+      {
+        date: "2025-08-05",
+        time: "19:00",
+        title: "新生迎新晚會",
+        location: "大禮堂",
+        organizer: "學生會",
+        organizerIntro: "代表全體學生權益，舉辦各項校園活動。",
+        description: "歡迎新同學加入高雄大學，準備了豐富的表演和互動環節。",
+        contact: "studentunion@example.com",
+        poster: ""
+      }
+    ];
+
+    // DOM elements for authentication and event details
+    const loginBtn = document.getElementById("login-btn");
+    const registerBtn = document.getElementById("register-btn");
+    const logoutBtn = document.getElementById("logout-btn");
+    const loginModal = document.getElementById("login-modal");
+    const registerModal = document.getElementById("register-modal");
+    const loginUsernameInput = document.getElementById("login-username");
+    const loginPasswordInput = document.getElementById("login-password");
+    const registerUsernameInput = document.getElementById("register-username");
+    const registerPasswordInput = document.getElementById("register-password");
+    const loginMessage = document.getElementById("login-message");
+    const registerMessage = document.getElementById("register-message");
+    const addEventBox = document.getElementById("add-event-box");
+
+    // Event Detail Box elements
+    const eventDetailBox = document.getElementById("event-detail-box");
+    const detailTitle = document.getElementById("detail-title");
+    const detailDatetime = document.getElementById("detail-datetime");
+    const detailLocation = document.getElementById("detail-location");
+    const detailOrganizer = document.getElementById("detail-organizer");
+    const detailOrganizerIntro = document.getElementById("detail-organizer-intro");
+    const detailDescription = document.getElementById("detail-description");
+    const detailContact = document.getElementById("detail-contact");
+    const detailPosterContainer = document.getElementById("detail-poster-container");
+    const detailPoster = document.getElementById("detail-poster");
+
+    // Add Event Form elements
+    const eventPosterFileInput = document.getElementById("event-poster-file");
+    const posterPreviewImg = document.getElementById("poster-preview-img");
+    let currentPosterBase64 = ""; // To store the base64 string of the selected image
+
+    // Simple user storage (in a real application, this would be a database)
+    const users = JSON.parse(localStorage.getItem("users")) || {};
+
+    // Check login status on page load
+    checkLoginStatus();
+
+    function checkLoginStatus() {
+      const isLoggedIn = localStorage.getItem("loggedInUser");
+      if (isLoggedIn) {
+        loginBtn.style.display = "none";
+        registerBtn.style.display = "none";
+        logoutBtn.style.display = "block";
+        addEventBox.style.display = "block"; // Show add event box
+      } else {
+        loginBtn.style.display = "block";
+        registerBtn.style.display = "block";
+        logoutBtn.style.display = "none";
+        addEventBox.style.display = "none"; // Hide add event box
+      }
+    }
+
+    function openLoginModal() {
+      loginModal.style.display = "block";
+      loginMessage.textContent = ""; // Clear previous messages
+      loginUsernameInput.value = "";
+      loginPasswordInput.value = "";
+    }
+
+    function openRegisterModal() {
+      registerModal.style.display = "block";
+      registerMessage.textContent = ""; // Clear previous messages
+      registerUsernameInput.value = "";
+      registerPasswordInput.value = "";
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = "none";
+    }
+
+    // Close modal if clicked outside
+    window.onclick = function(event) {
+      if (event.target == loginModal) {
+        loginModal.style.display = "none";
+      }
+      if (event.target == registerModal) {
+        registerModal.style.display = "none";
+      }
+    }
+
+    function login() {
+      const username = loginUsernameInput.value;
+      const password = loginPasswordInput.value;
+
+      if (users[username] && users[username] === password) {
+        localStorage.setItem("loggedInUser", username);
+        loginMessage.textContent = "";
+        alert("登入成功！");
+        closeModal('login-modal');
+        checkLoginStatus(); // Update UI after successful login
+      } else {
+        loginMessage.textContent = "帳號或密碼錯誤。";
+      }
+    }
+
+    function register() {
+      const username = registerUsernameInput.value;
+      const password = registerPasswordInput.value;
+
+      if (!username || !password) {
+        registerMessage.textContent = "請輸入帳號和密碼。";
+        return;
+      }
+
+      if (users[username]) {
+        registerMessage.textContent = "此帳號已被註冊。";
+      } else {
+        users[username] = password;
+        localStorage.setItem("users", JSON.stringify(users));
+        registerMessage.textContent = "";
+        alert("註冊成功！請登入。");
+        closeModal('register-modal');
+        openLoginModal(); // Offer login after successful registration
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("loggedInUser");
+      alert("已登出。");
+      checkLoginStatus(); // Update UI after logout
+      eventDetailBox.style.display = "none"; // Hide event details on logout
+    }
+
+    // Function to preview selected poster image
+    function previewPoster(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                posterPreviewImg.src = e.target.result;
+                posterPreviewImg.style.display = "block";
+                currentPosterBase64 = e.target.result; // Store the Base64 string
+            };
+            reader.readAsDataURL(file); // Read file as Data URL (Base64)
+        } else {
+            posterPreviewImg.src = "";
+            posterPreviewImg.style.display = "none";
+            currentPosterBase64 = "";
+        }
+    }
+
+    function renderCalendar(date) {
+      calendar.innerHTML = "";
+      eventDetailBox.style.display = "none"; // Hide event details when rendering new month
+
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      monthYear.textContent = `${year} 年 ${month + 1} 月`;
+
+      ["日", "一", "二", "三", "四", "五", "六"].forEach(day => {
+        const div = document.createElement("div");
+        div.className = "header";
+        div.textContent = day;
+        calendar.appendChild(div);
+      });
+
+      for (let i = 0; i < firstDay; i++) {
+        calendar.appendChild(document.createElement("div"));
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const cell = document.createElement("div");
+        cell.className = "day";
+        const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+        const matches = events.filter(e => e.date === dateStr);
+
+        const label = document.createElement("div");
+        label.className = "date-number";
+        label.textContent = d;
+        cell.prepend(label);
+
+        if (matches.length > 0) {
+          cell.classList.add("has-event");
+          matches.forEach(e => {
+            const tag = document.createElement("span");
+            tag.className = "event-info";
+            tag.textContent = e.title;
+            cell.appendChild(tag);
+          });
+          // Attach click listener to the cell to display details
+          // Note: If multiple events on one day, it displays the first one's details
+          cell.onclick = () => displayEventDetails(matches[0]);
+        } else {
+            // Make non-event days also clickable but hide details
+            cell.onclick = () => eventDetailBox.style.display = "none";
+        }
+        calendar.appendChild(cell);
+      }
+    }
+
+    function displayEventDetails(event) {
+        eventDetailBox.style.display = "block";
+        detailTitle.textContent = event.title || 'N/A';
+        detailDatetime.textContent = `${event.date} ${event.time || '未定'}`;
+        detailLocation.textContent = event.location || 'N/A';
+        detailOrganizer.textContent = event.organizer || 'N/A';
+        detailOrganizerIntro.textContent = event.organizerIntro || '無';
+        detailDescription.textContent = event.description || '無';
+        detailContact.textContent = event.contact || '無';
+
+        if (event.poster) {
+            detailPoster.src = event.poster; // The poster is now a Base64 string
+            detailPosterContainer.style.display = "block";
+        } else {
+            detailPoster.src = "";
+            detailPosterContainer.style.display = "none";
+        }
+    }
+
+    function prevMonth() {
+      current.setMonth(current.getMonth() - 1);
+      renderCalendar(current);
+    }
+
+    function nextMonth() {
+      current.setMonth(current.getMonth() + 1);
+      renderCalendar(current);
+    }
+
+    function addEvent() {
+      const title = document.getElementById("event-title").value;
+      const datetime = document.getElementById("event-datetime").value;
+      const location = document.getElementById("event-location").value;
+      const organizer = document.getElementById("event-organizer").value;
+      const organizerIntro = document.getElementById("event-organizer-intro").value;
+      const description = document.getElementById("event-description").value;
+      const contact = document.getElementById("event-contact").value;
+      // Use currentPosterBase64 which stores the Base64 string of the selected file
+      const poster = currentPosterBase64;
+
+      if (title && datetime && location && organizer && description && contact) {
+        const [date, time] = datetime.split('T');
+        events.push({
+            date,
+            time,
+            title,
+            location,
+            organizer,
+            organizerIntro,
+            description,
+            contact,
+            poster
+        });
+        localStorage.setItem("events", JSON.stringify(events)); // Save events to localStorage
+        renderCalendar(current);
+        alert("活動新增成功！");
+        // Clear form and reset poster preview
+        document.getElementById("event-title").value = "";
+        document.getElementById("event-datetime").value = "";
+        document.getElementById("event-location").value = "";
+        document.getElementById("event-organizer").value = "";
+        document.getElementById("event-organizer-intro").value = "";
+        document.getElementById("event-description").value = "";
+        document.getElementById("event-contact").value = "";
+        eventPosterFileInput.value = ""; // Clear file input
+        posterPreviewImg.src = "";
+        posterPreviewImg.style.display = "none";
+        currentPosterBase64 = ""; // Clear the stored Base64 string
+      } else {
+        alert("請填寫所有標記為必填的活動資訊！");
+      }
+    }
+
+    renderCalendar(current);
+  </script>
+</body>
+</html>
