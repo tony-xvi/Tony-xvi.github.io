@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>高雄學生社團活動行事曆</title>
+  <style>
+    body {
+      font-family: "Noto Sans TC", sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+    }
+    header, footer {
+      background: #1976d2;
+      color: white;
+      text-align: center;
+      padding: 1em;
+    }
+    main {
+      max-width: 960px;
+      margin: auto;
+      padding: 1em;
+    }
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      text-align: center;
+      margin-bottom: 2em;
+    }
+    .day, .header {
+      padding: 10px;
+      background: #e3f2fd;
+      border-radius: 6px;
+    }
+    .day.has-event {
+      background: #90caf9;
+      cursor: pointer;
+    }
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 1em 0;
+    }
+    .event-list {
+      background: white;
+      padding: 1em;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      margin-bottom: 1em;
+    }
+    .submit-box {
+      background: #fff8e1;
+      padding: 1em;
+      border: 1px solid #ffe082;
+      border-radius: 8px;
+      margin-top: 2em;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>高雄學生社團活動行事曆</h1>
+    <p>快速查找與參與各社團活動</p>
+  </header>
+
+  <main>
+    <div class="controls">
+      <button onclick="prevMonth()">⬅️ 上個月</button>
+      <h2 id="month-year"></h2>
+      <button onclick="nextMonth()">➡️ 下個月</button>
+    </div>
+
+    <div class="calendar" id="calendar"></div>
+
+    <h2>📋 所有活動列表</h2>
+    <div id="event-list"></div>
+
+    <div class="submit-box">
+      <h3>📮 投稿活動方式</h3>
+      <p>請將活動資訊寄至官方信箱：</p>
+      <p><strong>Email：</strong>kaohsiung.club.events@gmail.com</p>
+      <p>我們會人工審核後更新至網站。</p>
+      <p>未來會考慮提供線上投稿表單。</p>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 高雄學生社團行事曆網站</p>
+  </footer>
+
+  <script>
+    const events = [
+      {
+        title: "社團迎新音樂會",
+        date: "2025-08-15",
+        time: "18:00",
+        location: "高雄市文化中心",
+        club: "高雄音樂社",
+        contact: "musicclub@example.com",
+        intro: "歡迎新生參加音樂演出與互動活動"
+      },
+      {
+        title: "志工服務分享會",
+        date: "2025-08-20",
+        time: "14:00",
+        location: "高雄市青少年活動中心",
+        club: "志工聯誼社",
+        contact: "volunteer@example.com",
+        intro: "分享國內外志工經驗，歡迎參與"
+      }
+    ];
+
+    const calendar = document.getElementById('calendar');
+    const monthYear = document.getElementById('month-year');
+    const eventList = document.getElementById('event-list');
+
+    let current = new Date();
+
+    function renderCalendar(date) {
+      calendar.innerHTML = '';
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      monthYear.textContent = `${year} 年 ${month + 1} 月`;
+
+      ['日', '一', '二', '三', '四', '五', '六'].forEach(day => {
+        const div = document.createElement('div');
+        div.className = 'header';
+        div.textContent = day;
+        calendar.appendChild(div);
+      });
+
+      for (let i = 0; i < firstDay; i++) calendar.appendChild(document.createElement('div'));
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const div = document.createElement('div');
+        div.className = 'day';
+        div.textContent = d;
+        if (events.find(e => e.date === dateStr)) {
+          div.classList.add('has-event');
+          div.addEventListener('click', () => showEventsOnDate(dateStr));
+        }
+        calendar.appendChild(div);
+      }
+    }
+
+    function showEventsOnDate(date) {
+      const matches = events.filter(e => e.date === date);
+      if (matches.length === 0) return;
+      eventList.innerHTML = `<h3>📆 ${date} 的活動</h3>` + matches.map(e => `
+        <div class="event-list">
+          <h4>${e.title}</h4>
+          <p><strong>時間：</strong>${e.date} ${e.time}</p>
+          <p><strong>地點：</strong>${e.location}</p>
+          <p><strong>主辦社團：</strong>${e.club}</p>
+          <p><strong>活動介紹：</strong>${e.intro}</p>
+          <p><strong>聯絡方式：</strong>${e.contact}</p>
+        </div>
+      `).join('');
+    }
+
+    function renderEventList() {
+      const sorted = [...events].sort((a, b) => new Date(a.date) - new Date(b.date));
+      eventList.innerHTML = sorted.map(e => `
+        <div class="event-list">
+          <h4>${e.title}</h4>
+          <p><strong>時間：</strong>${e.date} ${e.time}</p>
+          <p><strong>地點：</strong>${e.location}</p>
+          <p><strong>主辦社團：</strong>${e.club}</p>
+          <p><strong>活動介紹：</strong>${e.intro}</p>
+          <p><strong>聯絡方式：</strong>${e.contact}</p>
+        </div>
+      `).join('');
+    }
+
+    function nextMonth() {
+      current.setMonth(current.getMonth() + 1);
+      renderCalendar(current);
+    }
+
+    function prevMonth() {
+      current.setMonth(current.getMonth() - 1);
+      renderCalendar(current);
+    }
+
+    renderCalendar(current);
+    renderEventList();
+  </script>
+</body>
+</html>
