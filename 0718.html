@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>高雄學生社團活動行事曆</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Noto Sans TC', sans-serif;
+      background: linear-gradient(to right, #f2f6f9, #e0f7fa);
+    }
+    header, nav {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px;
+    }
+    header h1 {
+      margin: 0;
+    }
+    nav a {
+      margin: 0 10px;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    .page { display: none; padding: 20px; }
+    .page.active { display: block; }
+    .calendar-controls button,
+    button {
+      padding: 6px 12px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px 5px 0 0;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    table.calendar {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table.calendar td {
+      border: 1px solid #ccc;
+      height: 100px;
+      vertical-align: top;
+      padding: 5px;
+    }
+    .calendar-event {
+      background: #f2f2f2;
+      margin-top: 4px;
+      padding: 2px 4px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .event-card {
+      background: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .toast {
+      visibility: hidden;
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 16px;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .toast.show {
+      visibility: visible;
+      opacity: 1;
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 400px;
+      width: 90%;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 18px;
+      cursor: pointer;
+      color: #aaa;
+    }
+    .modal-close:hover {
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>高雄學生社團活動行事曆</h1>
+  </header>
+  <nav>
+    <a onclick="showPage('home')">首頁</a>
+    <a onclick="showPage('calendar')">行事曆</a>
+    <a onclick="showPage('loginRegister')" id="loginLink">登入/註冊</a>
+    <a onclick="showPage('personal')" id="personalLink" style="display:none">個人頁面</a>
+    <a onclick="showPage('addEvent')" id="adminLink" style="display:none">新增活動</a>
+    <a onclick="handleLogout()" id="logoutLink" style="display:none">登出</a>
+  </nav>
+
+  <section id="home" class="page active">
+  <h2>近期活動</h2>
+  <div id="homeEvents"></div>
+</section>
+
+<section id="calendar" class="page">
+  <h2 id="calendarTitle"></h2>
+  <div class="calendar-controls">
+    <button onclick="changeMonth(-1)">上一月</button>
+    <button onclick="changeMonth(1)">下一月</button>
+  </div>
+  <table class="calendar" id="calendarTable"></table>
+</section>
+
+<section id="loginRegister" class="page">
+  <h2>登入 / 註冊</h2>
+  <label>帳號：<input type="text" id="username"></label><br>
+  <label>密碼：<input type="password" id="password"></label><br>
+  <button onclick="handleLogin()">登入</button>
+  <hr>
+  <label>新帳號：<input type="text" id="newUsername"></label><br>
+  <label>新密碼：<input type="password" id="newPassword"></label><br>
+  <button onclick="handleRegister()">註冊</button>
+</section>
+
+<section id="personal" class="page">
+  <h2>我的收藏活動</h2>
+  <ul id="favoritesList"></ul>
+</section>
+
+<section id="addEvent" class="page">
+  <h2>新增活動（限管理員）</h2>
+  <label>活動名稱：<input type="text" id="eventName"></label><br>
+  <label>主辦單位：<input type="text" id="eventOrg"></label><br>
+  <label>活動時間：<input type="datetime-local" id="eventTime"></label><br>
+  <label>活動地點：<input type="text" id="eventLocation"></label><br>
+  <label>票價：<input type="text" id="eventPrice"></label><br>
+  <label>社群連結：<input type="url" id="eventSocial"></label><br>
+  <label>宣傳照網址：<input type="url" id="eventImage"></label><br>
+  <button onclick="addEvent()">新增活動</button>
+</section>
+
+<div id="modalContainer"></div>
+
+<script>
+let users = JSON.parse(localStorage.getItem('users')) || {};
+let events = JSON.parse(localStorage.getItem('events')) || [];
+let currentUser = null;
+let favorites = JSON.parse(localStorage.getItem('favorites')) || {};
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
+
+function handleRegister() {
+  const username = document.getElementById('newUsername').value;
+  const password = document.getElementById('newPassword').value;
+  if (users[username]) return showToast('帳號已存在');
+  users[username] = { password, isAdmin: username === 'Tony' && password === '961002' };
+  localStorage.setItem('users', JSON.stringify(users));
+  showToast('註冊成功，請登入');
+}
+
+function handleLogin() {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+
+  // 修正：如果帳號為 Tony 且密碼為 961002，直接判斷為管理員
+  if (username === 'Tony' && password === '961002') {
+    users['Tony'] = { password: '961002', isAdmin: true };
+    localStorage.setItem('users', JSON.stringify(users));
+  }
+
+  const user = users[username];
+  if (!user || user.password !== password) return showToast('帳號或密碼錯誤');
+  currentUser = username;
+  document.getElementById('personalLink').style.display = 'inline';
+  document.getElementById('logoutLink').style.display = 'inline';
+  document.getElementById('loginLink').style.display = 'none';
+  if (user.isAdmin) document.getElementById('adminLink').style.display = 'inline';
+  showPage('home');
+  showToast('登入成功');
+  renderFavorites();
+}
+
+function addEvent() {
+  if (!currentUser || !users[currentUser].isAdmin) return showToast('僅限管理員新增活動');
+  const e = {
+    name: document.getElementById('eventName').value,
+    org: document.getElementById('eventOrg').value,
+    time: document.getElementById('eventTime').value,
+    location: document.getElementById('eventLocation').value,
+    price: document.getElementById('eventPrice').value,
+    social: document.getElementById('eventSocial').value,
+    image: document.getElementById('eventImage').value
+  };
+  events.push(e);
+  localStorage.setItem('events', JSON.stringify(events));
+  renderCalendar(currentMonth, currentYear);
+  updateHomeEvents();
+  showToast('活動新增成功');
+}
+
+function renderCalendar(month, year) {
+  const table = document.getElementById('calendarTable');
+  const title = document.getElementById('calendarTitle');
+  table.innerHTML = '';
+  title.textContent = `${year} 年 ${month + 1} 月`;
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  let date = 1;
+  for (let i = 0; i < 6; i++) {
+    const row = document.createElement('tr');
+    for (let j = 0; j < 7; j++) {
+      const cell = document.createElement('td');
+      if (i === 0 && j < firstDay) {
+        cell.innerHTML = '';
+      } else if (date > daysInMonth) {
+        break;
+      } else {
+        cell.innerHTML = `<strong>${date}</strong>`;
+        const thisDate = new Date(year, month, date).toISOString().split('T')[0];
+        events.forEach(evt => {
+          if (evt.time.startsWith(thisDate)) {
+            const div = document.createElement('div');
+            div.className = 'calendar-event';
+            div.textContent = evt.name;
+            div.onclick = () => showEventDetail(evt);
+            cell.appendChild(div);
+          }
+        });
+        date++;
+      }
+      row.appendChild(cell);
+    }
+    table.appendChild(row);
+  }
+}
+
+function changeMonth(offset) {
+  currentMonth += offset;
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  else if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  renderCalendar(currentMonth, currentYear);
+}
+
+function showEventDetail(evt) {
+  const container = document.getElementById('modalContainer');
+  container.innerHTML = `
+    <div class="modal-overlay" onclick="this.remove()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <span class="modal-close" onclick="this.closest('.modal-overlay').remove()">×</span>
+        <h3>${evt.name}</h3>
+        <p>主辦單位：${evt.org}</p>
+        <p>時間：${evt.time}</p>
+        <p>地點：${evt.location}</p>
+        <p>票價：${evt.price}</p>
+        <p><a href="${evt.social}" target="_blank">社群連結</a></p>
+        <img src="${evt.image}" alt="宣傳照" style="width:100%;max-height:200px;object-fit:cover">
+        ${currentUser ? `<button onclick='addFavorite(${JSON.stringify(evt)})'>收藏</button>` : ''}
+      </div>
+    </div>`;
+}
+
+function addFavorite(evt) {
+  if (!currentUser) return;
+  favorites[currentUser] = favorites[currentUser] || [];
+  const exists = favorites[currentUser].some(e => e.name === evt.name && e.time === evt.time);
+  if (!exists) {
+    favorites[currentUser].push(evt);
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+    renderFavorites();
+    showToast('已加入收藏');
+  }
+}
+
+function renderFavorites() {
+  const list = document.getElementById('favoritesList');
+  list.innerHTML = '';
+  (favorites[currentUser] || []).forEach((evt, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <strong>${evt.name}</strong> - ${evt.time}<br>
+      <button onclick="removeFavorite(${i})">取消收藏</button>`;
+    list.appendChild(li);
+  });
+}
+
+function removeFavorite(index) {
+  favorites[currentUser].splice(index, 1);
+  localStorage.setItem('favorites', JSON.stringify(favorites));
+  renderFavorites();
+  showToast('已取消收藏');
+}
+
+function updateHomeEvents() {
+  const list = document.getElementById('homeEvents');
+  list.innerHTML = '';
+  const sorted = [...events].sort((a,b) => new Date(a.time)-new Date(b.time)).slice(0,3);
+  sorted.forEach(evt => {
+    const div = document.createElement('div');
+    div.className = 'event-card';
+    div.textContent = evt.name;
+    div.onclick = () => showEventDetail(evt);
+    list.appendChild(div);
+  });
+}
+
+renderCalendar(currentMonth, currentYear);
+updateHomeEvents();
+</script>
+
+  <!-- Toast提示元件 -->
+  <div id="toast" class="toast"></div>
+  <!-- 動態頁面與功能腳本 -->
+  <script>
+    // 初始頁面顯示設定
+    function showPage(id) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      const target = document.getElementById(id);
+      if (target) target.classList.add('active');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function handleLogout() {
+      showToast('已登出');
+      document.getElementById('personalLink').style.display = 'none';
+      document.getElementById('adminLink').style.display = 'none';
+      document.getElementById('logoutLink').style.display = 'none';
+      document.getElementById('loginLink').style.display = 'inline';
+      showPage('home');
+    }
+  </script>
+</body>
+</html>
