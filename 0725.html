@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>高雄學生社團活動行事曆</title>
+  <style>
+    body { margin: 0; font-family: 'Noto Sans TC', sans-serif; background: linear-gradient(to right, #f2f6f9, #e0f7fa);}
+    header, nav { background-color: #4CAF50; color: white; padding: 10px; }
+    header h1 { margin: 0; }
+    nav a { margin: 0 10px; color: white; text-decoration: none; font-weight: bold; cursor: pointer;}
+    nav a:hover { text-decoration: underline; }
+    .page { display: none; padding: 20px; }
+    .page.active { display: block; }
+    .calendar-controls button, button { padding: 6px 12px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px 5px 0 0;}
+    button:hover { background: #45a049; }
+    table.calendar { width: 100%; border-collapse: collapse; }
+    table.calendar td { border: 1px solid #ccc; height: 100px; vertical-align: top; padding: 5px;}
+    .calendar-event { background: #f2f2f2; margin-top: 4px; padding: 2px 4px; border-radius: 4px; cursor: pointer;}
+    .event-card { background: white; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-bottom: 10px; padding: 10px; border-radius: 6px; cursor: pointer; transition: box-shadow 0.2s; position: relative;}
+    .event-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.18);}
+    .delete-btn { background: #e53935; color: #fff; border: none; border-radius: 4px; padding: 3px 10px; cursor: pointer; position: absolute; top: 10px; right: 10px; font-size: 13px; z-index: 10; opacity: 0.8;}
+    .delete-btn:hover { background: #b71c1c; opacity: 1;}
+    .toast { visibility: hidden; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #4CAF50; color: white; padding: 10px 20px; border-radius: 5px; font-size: 16px; z-index: 9999; opacity: 0; transition: opacity 0.4s;}
+    .toast.show { visibility: visible; opacity: 1;}
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;}
+    .modal { background: white; padding: 20px; border-radius: 10px; max-width: 400px; width: 90%; position: relative;}
+    .modal-close { position: absolute; top: 10px; right: 10px; font-size: 18px; cursor: pointer; color: #aaa;}
+    .modal-close:hover { color: #000;}
+    #previewImg { display: block; margin: 8px 0; max-width: 180px; max-height: 120px; border-radius: 5px; border: 1px solid #ccc; object-fit: cover;}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>高雄學生社團活動行事曆</h1>
+  </header>
+  <nav>
+    <a onclick="showPage('home')">首頁</a>
+    <a onclick="showPage('calendar')">行事曆</a>
+    <a onclick="showPage('loginRegister')" id="loginLink">登入/註冊</a>
+    <a onclick="showPage('personal')" id="personalLink" style="display:none">個人頁面</a>
+    <a onclick="showPage('addEvent')" id="adminLink" style="display:none">新增活動</a>
+    <a onclick="handleLogout()" id="logoutLink" style="display:none">登出</a>
+  </nav>
+  <section id="home" class="page active">
+    <h2>近期活動</h2>
+    <div id="homeEvents"></div>
+  </section>
+  <section id="calendar" class="page">
+    <h2 id="calendarTitle"></h2>
+    <div class="calendar-controls">
+      <button onclick="changeMonth(-1)">上一月</button>
+      <button onclick="changeMonth(1)">下一月</button>
+    </div>
+    <table class="calendar" id="calendarTable"></table>
+  </section>
+  <section id="loginRegister" class="page">
+    <h2>登入 / 註冊</h2>
+    <label>帳號：<input type="text" id="username"></label><br>
+    <label>密碼：<input type="password" id="password"></label><br>
+    <button onclick="handleLogin()">登入</button>
+    <hr>
+    <label>新帳號：<input type="text" id="newUsername"></label><br>
+    <label>新密碼：<input type="password" id="newPassword"></label><br>
+    <button onclick="handleRegister()">註冊</button>
+  </section>
+  <section id="personal" class="page">
+    <h2>我的收藏活動</h2>
+    <ul id="favoritesList"></ul>
+  </section>
+  <section id="addEvent" class="page">
+    <h2>新增活動（限管理員）</h2>
+    <label>活動名稱：<input type="text" id="eventName"></label><br>
+    <label>主辦單位：<input type="text" id="eventOrg"></label><br>
+    <label>活動時間：<input type="datetime-local" id="eventTime"></label><br>
+    <label>活動地點：<input type="text" id="eventLocation"></label><br>
+    <label>票價：<input type="text" id="eventPrice"></label><br>
+    <label>社群連結：<input type="url" id="eventSocial"></label><br>
+    <label>宣傳照：<input type="file" id="eventImageFile" accept="image/*" onchange="previewImage(this)"></label><br>
+    <img id="previewImg" style="display:none;">
+    <button onclick="addEvent()">新增活動</button>
+  </section>
+  <div id="modalContainer"></div>
+  <div id="toast" class="toast"></div>
+  <script>
+    let users = JSON.parse(localStorage.getItem('users')) || {};
+    let events = JSON.parse(localStorage.getItem('events')) || [];
+    let currentUser = null;
+    let favorites = JSON.parse(localStorage.getItem('favorites')) || {};
+    let currentMonth = new Date().getMonth();
+    let currentYear = new Date().getFullYear();
+    let uploadedImageBase64 = "";
+
+    function previewImage(input) {
+      const file = input.files[0];
+      const img = document.getElementById('previewImg');
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          uploadedImageBase64 = e.target.result;
+          img.src = e.target.result;
+          img.style.display = "block";
+        }
+        reader.readAsDataURL(file);
+      } else {
+        img.src = "";
+        img.style.display = "none";
+        uploadedImageBase64 = "";
+      }
+    }
+
+    function handleRegister() {
+      const username = document.getElementById('newUsername').value;
+      const password = document.getElementById('newPassword').value;
+      if (users[username]) return showToast('帳號已存在');
+      users[username] = { password, isAdmin: username === 'Tony' && password === '961002' };
+      localStorage.setItem('users', JSON.stringify(users));
+      showToast('註冊成功，請登入');
+    }
+
+    function handleLogin() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const user = users[username];
+      if (!user || user.password !== password) return showToast('帳號或密碼錯誤');
+      currentUser = username;
+      document.getElementById('personalLink').style.display = 'inline';
+      document.getElementById('logoutLink').style.display = 'inline';
+      document.getElementById('loginLink').style.display = 'none';
+      if (user.isAdmin) document.getElementById('adminLink').style.display = 'inline';
+      else document.getElementById('adminLink').style.display = 'none';
+      showPage('home');
+      showToast('登入成功');
+      renderFavorites();
+      updateHomeEvents();
+    }
+
+    function addEvent() {
+      if (!currentUser || !users[currentUser].isAdmin) return showToast('僅限管理員新增活動');
+      let imageValue = uploadedImageBase64 || "";
+      if (!imageValue) {
+        showToast('請上傳宣傳照');
+        return;
+      }
+      const e = {
+        name: document.getElementById('eventName').value,
+        org: document.getElementById('eventOrg').value,
+        time: document.getElementById('eventTime').value,
+        location: document.getElementById('eventLocation').value,
+        price: document.getElementById('eventPrice').value,
+        social: document.getElementById('eventSocial').value,
+        image: imageValue
+      };
+      events.push(e);
+      localStorage.setItem('events', JSON.stringify(events));
+      renderCalendar(currentMonth, currentYear);
+      updateHomeEvents();
+      showToast('活動新增成功');
+      document.getElementById('eventName').value = "";
+      document.getElementById('eventOrg').value = "";
+      document.getElementById('eventTime').value = "";
+      document.getElementById('eventLocation').value = "";
+      document.getElementById('eventPrice').value = "";
+      document.getElementById('eventSocial').value = "";
+      document.getElementById('eventImageFile').value = "";
+      document.getElementById('previewImg').src = "";
+      document.getElementById('previewImg').style.display = "none";
+      uploadedImageBase64 = "";
+    }
+
+    function deleteEvent(idx) {
+      if (!currentUser || !users[currentUser].isAdmin) return showToast('僅限管理員刪除活動');
+      if (!confirm('確定要刪除這個活動嗎？')) return;
+      const deleted = events[idx];
+      events.splice(idx, 1);
+      localStorage.setItem('events', JSON.stringify(events));
+      // 移除所有使用者的該收藏
+      Object.keys(favorites).forEach(user => {
+        favorites[user] = (favorites[user] || []).filter(e =>
+          !(
+            e.name === deleted.name &&
+            e.time === deleted.time &&
+            e.org === deleted.org &&
+            e.location === deleted.location
+          )
+        );
+      });
+      localStorage.setItem('favorites', JSON.stringify(favorites));
+      renderFavorites();
+      renderCalendar(currentMonth, currentYear);
+      updateHomeEvents();
+      closeModal();
+      showToast('已刪除活動');
+    }
+
+    function renderCalendar(month, year) {
+      const table = document.getElementById('calendarTable');
+      const title = document.getElementById('calendarTitle');
+      table.innerHTML = '';
+      title.textContent = `${year} 年 ${month + 1} 月`;
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      let date = 1;
+      for (let i = 0; i < 6; i++) {
+        const row = document.createElement('tr');
+        for (let j = 0; j < 7; j++) {
+          const cell = document.createElement('td');
+          if (i === 0 && j < firstDay) {
+            cell.innerHTML = '';
+          } else if (date > daysInMonth) {
+            break;
+          } else {
+            cell.innerHTML = `<strong>${date}</strong>`;
+            const thisDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+            events.forEach((evt, idx) => {
+              if (evt.time && evt.time.substr(0,10) === thisDate) {
+                const div = document.createElement('div');
+                div.className = 'calendar-event';
+                div.textContent = evt.name;
+                div.addEventListener('click', function(e) {
+                  e.stopPropagation();
+                  showEventDetail(evt, idx);
+                });
+                cell.appendChild(div);
+              }
+            });
+            date++;
+          }
+          row.appendChild(cell);
+        }
+        table.appendChild(row);
+      }
+    }
+
+    function updateHomeEvents() {
+      const list = document.getElementById('homeEvents');
+      list.innerHTML = '';
+      const now = new Date();
+      const todayString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const sorted = [...events]
+        .map((evt, idx) => ({...evt, _idx: idx}))
+        .filter(evt => evt.time && evt.time.substr(0,10) >= todayString)
+        .sort((a, b) => a.time.localeCompare(b.time))
+        .slice(0, 3);
+      sorted.forEach(evt => {
+        const div = document.createElement('div');
+        div.className = 'event-card';
+        div.innerHTML = `
+          <strong>${evt.name}</strong><br>
+          <span>主辦單位：${evt.org || ''}</span><br>
+          <span>時間：${evt.time ? evt.time.replace('T', ' ') : ''}</span>
+        `;
+        div.addEventListener('click', function() {
+          showEventDetail(events[evt._idx], evt._idx);
+        });
+        if (currentUser && users[currentUser].isAdmin) {
+          const delBtn = document.createElement('button');
+          delBtn.textContent = "刪除";
+          delBtn.className = "delete-btn";
+          delBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            deleteEvent(evt._idx);
+          });
+          div.appendChild(delBtn);
+        }
+        list.appendChild(div);
+      });
+    }
+
+    function changeMonth(offset) {
+      currentMonth += offset;
+      if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+      else if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+      renderCalendar(currentMonth, currentYear);
+    }
+
+    function showEventDetail(evt, idx) {
+      const container = document.getElementById('modalContainer');
+      container.innerHTML = `
+        <div class="modal-overlay">
+          <div class="modal" onclick="event.stopPropagation()">
+            <span class="modal-close" onclick="closeModal()">×</span>
+            <h3>${evt.name}</h3>
+            <p>主辦單位：${evt.org}</p>
+            <p>時間：${evt.time}</p>
+            <p>地點：${evt.location}</p>
+            <p>票價：${evt.price}</p>
+            <p><a href="${evt.social}" target="_blank">社群連結</a></p>
+            <img src="${evt.image}" alt="宣傳照" style="width:100%;max-height:200px;object-fit:cover">
+            ${currentUser ? `<button id="favBtn">收藏</button>` : ''}
+            ${currentUser && users[currentUser].isAdmin ? `<button id="delEventBtn" style="margin-left:10px;background:#e53935;">刪除活動</button>` : ''}
+          </div>
+        </div>`;
+      setTimeout(function() {
+        if (currentUser) {
+          const favBtn = document.getElementById('favBtn');
+          if (favBtn) favBtn.onclick = function() { addFavorite(evt); };
+        }
+        if (currentUser && users[currentUser].isAdmin) {
+          const delBtn = document.getElementById('delEventBtn');
+          if (delBtn) delBtn.onclick = function(e) {
+            e.stopPropagation();
+            deleteEvent(idx);
+          };
+        }
+        const overlay = document.querySelector('.modal-overlay');
+        overlay.onclick = function(e) { if (e.target === overlay) closeModal(); };
+      }, 0);
+    }
+
+    function closeModal() {
+      document.getElementById('modalContainer').innerHTML = '';
+    }
+
+    function getEventIdx(evt) {
+      return events.findIndex(e =>
+        e.name === evt.name &&
+        e.time === evt.time &&
+        e.org === evt.org &&
+        e.location === evt.location
+      );
+    }
+
+    function addFavorite(evt) {
+      if (!currentUser) return;
+      favorites[currentUser] = favorites[currentUser] || [];
+      const exists = favorites[currentUser].some(e => e.name === evt.name && e.time === evt.time);
+      if (!exists) {
+        favorites[currentUser].push(evt);
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+        renderFavorites();
+        showToast('已加入收藏');
+      }
+    }
+
+    function renderFavorites() {
+      const list = document.getElementById('favoritesList');
+      list.innerHTML = '';
+      (favorites[currentUser] || []).forEach((evt, i) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <strong>${evt.name}</strong> - ${evt.time}<br>
+          <button onclick="removeFavorite(${i})">取消收藏</button>`;
+        list.appendChild(li);
+      });
+    }
+
+    function removeFavorite(index) {
+      favorites[currentUser].splice(index, 1);
+      localStorage.setItem('favorites', JSON.stringify(favorites));
+      renderFavorites();
+      showToast('已取消收藏');
+    }
+
+    function showPage(id) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      const target = document.getElementById(id);
+      if (target) target.classList.add('active');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function handleLogout() {
+      showToast('已登出');
+      document.getElementById('personalLink').style.display = 'none';
+      document.getElementById('adminLink').style.display = 'none';
+      document.getElementById('logoutLink').style.display = 'none';
+      document.getElementById('loginLink').style.display = 'inline';
+      showPage('home');
+    }
+
+    renderCalendar(currentMonth, currentYear);
+    updateHomeEvents();
+  </script>
+</body>
+</html>
