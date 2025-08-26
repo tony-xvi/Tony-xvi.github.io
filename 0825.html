@@ -50,7 +50,7 @@
     .fade-out{animation:fadeShrink .32s ease forwards}
     @keyframes fadeShrink{to{opacity:0;transform:translateY(-6px);height:0;margin:0;padding-top:0;padding-bottom:0}}
 
-    /* 按鈕 */
+    /* 按鈕（統一風格） */
     .btn{font-family:inherit;font-size:.98rem;border:0;border-radius:10px;padding:9px 18px;font-weight:800;cursor:pointer;box-shadow:0 3px 12px #0003;transition:background .16s,color .12s,transform .12s,box-shadow .16s}
     .btn:active{transform:translateY(1px) scale(.99)}
     .btn-default{background:var(--accent-2);color:#fff}.btn-default:hover{background:#25a86a}
@@ -252,6 +252,8 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+
+    // 嘗試匿名登入（但不要等它完成才畫面）
     firebase.auth().signInAnonymously().catch(console.error);
 
     // 雲端 CRUD
@@ -270,6 +272,10 @@
     async function cloudLoadUsers() {
       const snap = await db.collection('users').get();
       const obj = {}; snap.forEach(d => obj[d.id] = d.data()); return obj;
+    }
+    async function cloudLoadUserOnce(username){
+      const doc = await db.collection('users').doc(username).get();
+      return doc.exists ? doc.data() : null;
     }
     async function cloudLoadFavorites(username) {
       if (!username) return [];
@@ -396,10 +402,27 @@
     async function handleLogin(){
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
-      const user = users[username];
-      if (!user || user.password !== password) return showToast('帳號或密碼錯誤');
-      currentUser = username;
 
+      // 先看本地
+      let user = users[username];
+
+      // 若本地沒有，去雲端抓一次（避免新裝置第一次登入失敗）
+      if (!user) {
+        try {
+          const cloudUser = await cloudLoadUserOnce(username);
+          if (cloudUser) {
+            users[username] = cloudUser;
+            localStorage.setItem('users', JSON.stringify(users));
+            user = cloudUser;
+          }
+        } catch (e) {
+          console.warn('load user on login failed', e);
+        }
+      }
+
+      if (!user || user.password !== password) return showToast('帳號或密碼錯誤');
+
+      currentUser = username;
       document.getElementById('personalLink').style.display = 'inline';
       document.getElementById('logoutLink').style.display = 'inline';
       document.getElementById('loginLink').style.display = 'none';
@@ -419,7 +442,7 @@
         });
       }catch(e){ console.warn(e); }
 
-      await ensureAdminExists(); // 若整個系統尚無管理者，第一個登入者成為管理者
+      await ensureAdminExists();
       renderFavorites(); updateHomeEvents();
     }
 
@@ -467,12 +490,9 @@
         desc: document.getElementById('eventDesc').value.trim() || '',
         image: uploadedImageBase64 || ''
       };
-      // 先本地加入（即時有反應）
       events.push(e); localStorage.setItem('events', JSON.stringify(events));
-      // 再雲端加入（成功回填 id）
       try{ const id = await cloudAddEvent(e); events[events.length-1].id = id; localStorage.setItem('events', JSON.stringify(events)); }
       catch(err){ console.warn('Cloud add failed', err); }
-      // 清表單
       ['eventName','eventOrg','eventTime','eventLocation','eventPrice','eventSocial','eventDesc'].forEach(id=>document.getElementById(id).value='');
       document.getElementById('eventImageFile').value=''; document.getElementById('previewImg').src=''; document.getElementById('previewImg').style.display='none'; uploadedImageBase64='';
       renderCalendarByMode(); updateHomeEvents(); showToast('活動新增成功');
@@ -486,10 +506,8 @@
     async function doDeleteEvent(idx){
       const deleted = events[idx];
       try{ if (deleted.id) await cloudDeleteEvent(deleted.id); }catch(e){ console.warn('Cloud delete failed', e); }
-      // 刪本地 + 同步移除所有人的收藏（雲端）
       events.splice(idx,1); localStorage.setItem('events', JSON.stringify(events));
       await cloudPurgeFavoritesForAll(deleted);
-      // 本地 favorites 也清一次
       Object.keys(favorites).forEach(u => {
         favorites[u] = (favorites[u]||[]).filter(e => !(e.name===deleted.name && e.time===deleted.time && e.org===deleted.org && e.location===deleted.location));
       });
@@ -505,7 +523,6 @@
       ['modeMonth','modeWeek','modeList'].forEach(id=>{ document.getElementById(id).classList.remove('btn-blue'); document.getElementById(id).classList.add('btn-ghost');});
       const activeBtn = mode==='month'?'modeMonth':mode==='week'?'modeWeek':'modeList';
       document.getElementById(activeBtn).classList.remove('btn-ghost'); document.getElementById(activeBtn).classList.add('btn-blue');
-
       if (mode==='month'){
         const viewingCurrent = isViewingCurrentMonth(currentYear, currentMonth);
         if (!viewingCurrent && !selectedDayInMonth) selectedDayInMonth = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-01`;
@@ -761,17 +778,45 @@
     }
     function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2800); }
 
-    /* 初始化 */
-    window.addEventListener('load', async ()=>{
-      await seedAdminTony();            // ★ 確保 Tony/961002 為管理者
-      await cloudLoadAll();             // 先拉遠端資料（events/users）
-      renderCalendarByMode(); updateHomeEvents();
-      moveUnderline(document.querySelector('nav a[data-page="home"]'));
-      setCalendarMode('month');
+    /* ========= 啟動流程：先畫快取，再嘗試讀雲端（未登入也可），再等匿名登入開訂閱 ========= */
+    window.addEventListener('load', async () => {
+      // 1) 先把本地快取畫出來（使用者一打開就有內容）
+      try {
+        renderCalendarByMode();
+        updateHomeEvents();
+        moveUnderline(document.querySelector('nav a[data-page="home"]'));
+        setCalendarMode('month');
+      } catch (_) {}
 
-      // 即時訂閱 events（跨裝置無需重整）
-      const unSubEvents = subscribeEventsRealtime();
-      window.addEventListener('beforeunload', ()=>{ try{unSubEvents&&unSubEvents();}catch(_){ } });
+      // 2) 先嘗試直接讀雲端（若規則 allow read: if true; 未登入也可成功）
+      try {
+        const ev = await cloudLoadEvents();
+        if (Array.isArray(ev) && ev.length >= 0) {
+          events = ev;
+          localStorage.setItem('events', JSON.stringify(events));
+          renderCalendarByMode();
+          updateHomeEvents();
+        }
+      } catch (e) {
+        // 未開放公開讀或網路問題就忽略，等待登入後再同步
+        console.warn('Public fetch events failed (will retry after auth)', e);
+      }
+
+      // 3) 等匿名登入完成後，再種管理者、抓 users、開即時訂閱
+      firebase.auth().onAuthStateChanged(async (user) => {
+        if (!user) return;
+        try{
+          await seedAdminTony();
+          await cloudLoadAll();
+          renderCalendarByMode();
+          updateHomeEvents();
+
+          const unSubEvents = subscribeEventsRealtime();
+          window.addEventListener('beforeunload', () => { try { unSubEvents && unSubEvents(); } catch (_) {} });
+        }catch(e){
+          console.warn('init after auth failed', e);
+        }
+      });
     });
   </script>
 </body>
