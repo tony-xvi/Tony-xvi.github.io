@@ -31,7 +31,7 @@
     .page.active{display:block;animation:fadeSlideIn .38s ease-out forwards}
     @keyframes fadeSlideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-    /* 首頁封面（完整顯示圖片、不裁切） */
+    /* 首頁封面 */
     .cover-photo-frame{width:100%;max-width:1180px;margin:14px auto 28px;border-radius:24px;padding:12px;background:radial-gradient(120% 120% at 50% 50%,rgba(24,28,33,0) 70%,rgba(24,28,33,1) 100%);box-shadow:var(--shadow-3)}
     .cover-photo-box{border-radius:16px;overflow:hidden;display:block;background:transparent}
     .cover-photo{display:block;width:100%;height:auto;-webkit-user-select:none;user-select:none}
@@ -113,7 +113,7 @@
     .contact-info a{color:var(--brand);text-decoration:underline}
   </style>
 
-  <!-- Firebase SDK（CDN） -->
+  <!-- Firebase SDK（CDN compat 版） -->
   <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
@@ -241,14 +241,19 @@
 
   <script>
     /* ============ Firebase 初始化與雲端函式 ============ */
-    // ★★ 把下面換成你的 Firebase 專案設定 ★★
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID"
+      apiKey: "AIzaSyCUlK8CCnDsEcgJxTjm2X84oR812ChheRw",
+      authDomain: "kevents-ae1c1.firebaseapp.com",
+      projectId: "kevents-ae1c1",
+      storageBucket: "kevents-ae1c1.firebasestorage.app",
+      messagingSenderId: "537141526501",
+      appId: "1:537141526501:web:e3d41942fdfafa131f790c",
+      measurementId: "G-K1ZMGJ2ZFJ"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+
+    // 先不要馬上讀 Firestore；等匿名登入完成
     firebase.auth().signInAnonymously().catch(console.error);
 
     // 雲端 CRUD
@@ -268,6 +273,10 @@
       const snap = await db.collection('users').get();
       const obj = {}; snap.forEach(d => obj[d.id] = d.data()); return obj;
     }
+    async function cloudLoadUserOnce(username){
+      const doc = await db.collection('users').doc(username).get();
+      return doc.exists ? doc.data() : null;
+    }
     async function cloudLoadFavorites(username) {
       if (!username) return [];
       const doc = await db.collection('favorites').doc(username).get();
@@ -277,7 +286,7 @@
       if (!username) return;
       await db.collection('favorites').doc(username).set({ items }, { merge: true });
     }
-    // 刪除活動時，一並從所有人的收藏移除該活動
+    // 刪除活動時，同步從所有人的收藏移除
     async function cloudPurgeFavoritesForAll(deletedEvent) {
       try {
         const favSnap = await db.collection('favorites').get();
@@ -393,10 +402,27 @@
     async function handleLogin(){
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
-      const user = users[username];
-      if (!user || user.password !== password) return showToast('帳號或密碼錯誤');
-      currentUser = username;
 
+      // 先看本地
+      let user = users[username];
+
+      // ★ 若本地沒有（或還沒同步），改去雲端抓一次（避免手機第一次載入時登入失敗）
+      if (!user) {
+        try {
+          const cloudUser = await cloudLoadUserOnce(username);
+          if (cloudUser) {
+            users[username] = cloudUser;
+            localStorage.setItem('users', JSON.stringify(users));
+            user = cloudUser;
+          }
+        } catch (e) {
+          console.warn('load user on login failed', e);
+        }
+      }
+
+      if (!user || user.password !== password) return showToast('帳號或密碼錯誤');
+
+      currentUser = username;
       document.getElementById('personalLink').style.display = 'inline';
       document.getElementById('logoutLink').style.display = 'inline';
       document.getElementById('loginLink').style.display = 'none';
@@ -416,7 +442,7 @@
         });
       }catch(e){ console.warn(e); }
 
-      await ensureAdminExists(); // 若整個系統尚無管理者，第一個登入者成為管理者
+      await ensureAdminExists();
       renderFavorites(); updateHomeEvents();
     }
 
@@ -464,12 +490,9 @@
         desc: document.getElementById('eventDesc').value.trim() || '',
         image: uploadedImageBase64 || ''
       };
-      // 先本地加入（即時有反應）
       events.push(e); localStorage.setItem('events', JSON.stringify(events));
-      // 再雲端加入（成功回填 id）
       try{ const id = await cloudAddEvent(e); events[events.length-1].id = id; localStorage.setItem('events', JSON.stringify(events)); }
       catch(err){ console.warn('Cloud add failed', err); }
-      // 清表單
       ['eventName','eventOrg','eventTime','eventLocation','eventPrice','eventSocial','eventDesc'].forEach(id=>document.getElementById(id).value='');
       document.getElementById('eventImageFile').value=''; document.getElementById('previewImg').src=''; document.getElementById('previewImg').style.display='none'; uploadedImageBase64='';
       renderCalendarByMode(); updateHomeEvents(); showToast('活動新增成功');
@@ -483,10 +506,8 @@
     async function doDeleteEvent(idx){
       const deleted = events[idx];
       try{ if (deleted.id) await cloudDeleteEvent(deleted.id); }catch(e){ console.warn('Cloud delete failed', e); }
-      // 刪本地 + 同步移除所有人的收藏（雲端）
       events.splice(idx,1); localStorage.setItem('events', JSON.stringify(events));
       await cloudPurgeFavoritesForAll(deleted);
-      // 本地 favorites 也清一次（目前登入者）
       Object.keys(favorites).forEach(u => {
         favorites[u] = (favorites[u]||[]).filter(e => !(e.name===deleted.name && e.time===deleted.time && e.org===deleted.org && e.location===deleted.location));
       });
@@ -502,7 +523,6 @@
       ['modeMonth','modeWeek','modeList'].forEach(id=>{ document.getElementById(id).classList.remove('btn-blue'); document.getElementById(id).classList.add('btn-ghost');});
       const activeBtn = mode==='month'?'modeMonth':mode==='week'?'modeWeek':'modeList';
       document.getElementById(activeBtn).classList.remove('btn-ghost'); document.getElementById(activeBtn).classList.add('btn-blue');
-
       if (mode==='month'){
         const viewingCurrent = isViewingCurrentMonth(currentYear, currentMonth);
         if (!viewingCurrent && !selectedDayInMonth) selectedDayInMonth = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-01`;
@@ -758,17 +778,24 @@
     }
     function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2800); }
 
-    /* 初始化 */
+    /* ========= 關鍵修正：等匿名登入完成再啟動 App ========= */
     window.addEventListener('load', async ()=>{
-      await seedAdminTony();            // ★ 確保 Tony/961002 為管理者
-      await cloudLoadAll();             // 先拉遠端資料（events/users）
-      renderCalendarByMode(); updateHomeEvents();
-      moveUnderline(document.querySelector('nav a[data-page="home"]'));
-      setCalendarMode('month');
+      firebase.auth().onAuthStateChanged(async (user) => {
+        if (!user) return;               // 還沒登入好，先別動
+        try{
+          await seedAdminTony();         // ★ 確保 Tony/961002 為管理者（雲端＋本地）
+          await cloudLoadAll();          // ★ 拉遠端 users/events 到本地
+          renderCalendarByMode(); updateHomeEvents();
+          moveUnderline(document.querySelector('nav a[data-page="home"]'));
+          setCalendarMode('month');
 
-      // 即時訂閱 events（跨裝置無需重整）
-      const unSubEvents = subscribeEventsRealtime();
-      window.addEventListener('beforeunload', ()=>{ try{unSubEvents&&unSubEvents();}catch(_){ } });
+          // ★ 匿名登入完成後才開始訂閱（確保手機端也能成功）
+          const unSubEvents = subscribeEventsRealtime();
+          window.addEventListener('beforeunload', ()=>{ try{unSubEvents&&unSubEvents();}catch(_){ } });
+        }catch(e){
+          console.warn('init after auth failed', e);
+        }
+      });
     });
   </script>
 </body>
