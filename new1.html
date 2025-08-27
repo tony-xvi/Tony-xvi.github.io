@@ -8,20 +8,17 @@
 <style>
   :root{
     --bg:#0f1215; --panel:#111418; --panel-2:#171b21;
-    --ink:#eaeef6; --sub:#c8d5e6; --muted:#9fb0c8;
+    --ink:#eaeef6; --sub:#c8d5e6;
     --brand:#66b8ff; --accent:#2599ff; --accent-2:#2ec67d; --danger:#e17055;
     --line:#263245; --input:#131821; --input-line:#2a394d; --input-focus:#3aa0ff;
     --shadow-1:0 2px 8px #0006; --shadow-2:0 8px 32px #0005; --shadow-3:0 18px 70px #06131f66;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
-  body{margin:0;font-family:'Noto Sans TC','Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+  body{margin:0;font-family:'Noto Sans TC','Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--ink)}
 
-  /* ── Navbar ─────────────────────────────────────────────────── */
-  header{
-    background:linear-gradient(180deg,#000,#0e1115);
-    color:#fff; position:sticky; top:0; z-index:10; box-shadow:var(--shadow-1);
-  }
+  /* Navbar（黑底，logo 圖片、拿掉字樣） */
+  header{background:linear-gradient(180deg,#000,#0e1115);color:#fff;position:sticky;top:0;z-index:10;box-shadow:var(--shadow-1)}
   .navbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;gap:14px}
   .brand-wrap{display:flex;align-items:center;gap:12px}
   .logo-img{height:34px;width:auto;display:block}
@@ -30,74 +27,67 @@
   nav a:hover{color:#fff}
   .nav-underline{position:absolute;bottom:-2px;height:3px;background:var(--brand);border-radius:2px;transition:transform .28s ease,width .28s ease,opacity .25s;opacity:.95;pointer-events:none}
 
-  /* ── Page shell ─────────────────────────────────────────────── */
+  /* Page shell */
   .page{display:none;padding:24px 5vw 0;opacity:0;transform:translateY(6px)}
   .page.active{display:block;animation:fadeSlideIn .32s ease-out forwards}
   @keyframes fadeSlideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-  /* ── 首頁 Hero（填滿，不留邊框） ───────────────────────── */
-  .hero{
-    border-radius:24px; overflow:hidden; margin:12px auto 22px; width:100%; max-width:1180px;
-    box-shadow:var(--shadow-3);
-  }
+  /* 首頁 Hero（填滿） */
+  .hero{border-radius:24px;overflow:hidden;margin:12px auto 22px;width:100%;max-width:1180px;box-shadow:var(--shadow-3)}
   .hero img{display:block;width:100%;height:auto}
 
   .home-section{background:var(--panel-2);border:1px solid var(--line);border-radius:22px;margin:18px 0 26px;padding:22px 18px;box-shadow:var(--shadow-1)}
-  .section-title{margin:0 0 16px;font-size:1.22rem;color:#e6f1ff;font-weight:800;letter-spacing:.5px}
+  .section-title{margin:0 0 16px;font-size:1.22rem;color:#e6f1ff;font-weight:800}
 
-  /* ── 統一按鈕 ──────────────────────────────────────────── */
-  .btn{font-family:inherit;font-size:.98rem;border:0;border-radius:10px;padding:9px 16px;font-weight:800;cursor:pointer;box-shadow:0 3px 12px #0003;transition:background .16s,color .12s,transform .12s,box-shadow .16s}
+  /* 統一按鈕 */
+  .btn{font-family:inherit;font-size:.98rem;border:0;border-radius:10px;padding:9px 16px;font-weight:800;cursor:pointer;box-shadow:0 3px 12px #0003;transition:background .16s,transform .12s}
   .btn:active{transform:translateY(1px) scale(.99)}
   .btn-default{background:var(--accent-2);color:#fff}.btn-default:hover{background:#25a86a}
   .btn-blue{background:var(--accent);color:#fff}.btn-blue:hover{background:#1975b5}
   .btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:#b34021}
   .btn-ghost{background:transparent;color:#d2e6f5;border:1px solid #334358}.btn-ghost:hover{color:#fff;border-color:#4a6a8c}
-  .btn-disabled,.btn[disabled]{background:#4e5765!important;color:#d2e6f5!important;cursor:not-allowed;box-shadow:none;opacity:.85}
+  .btn-disabled,.btn[disabled]{background:#4e5765!important;color:#d2e6f5!important;cursor:not-allowed;opacity:.85}
 
-  /* ── 表單 ──────────────────────────────────────────────── */
+  /* 表單 */
   .form-grid{display:grid;gap:14px}
-  .input-dark{width:100%;background:var(--input);color:var(--ink);border:1.5px solid var(--input-line);border-radius:10px;padding:11px 12px;font-size:1rem;outline:none;transition:border-color .15s,box-shadow .15s}
-  .input-dark::placeholder{color:#8aa2c5;opacity:.9}
+  .input-dark{width:100%;background:var(--input);color:var(--ink);border:1.5px solid var(--input-line);border-radius:10px;padding:11px 12px;font-size:1rem}
+  .input-dark::placeholder{color:#8aa2c5}
   .input-dark:focus{border-color:var(--input-focus);box-shadow:0 0 0 3px #3aa0ff33}
   textarea.input-dark{min-height:110px;resize:vertical}
 
-  /* ── 近期活動卡 ───────────────────────────────────────── */
-  .home-event-list,.favorite-event-list{display:flex;flex-direction:column;gap:18px;width:100%;align-items:center;margin:0;padding:0}
-  .event-card{background:#141a22;border:1px solid #233042;border-radius:18px;box-shadow:0 10px 28px #0b1524aa;padding:16px;display:flex;gap:14px;width:100%;max-width:780px;position:relative}
-  .event-card:hover{box-shadow:0 16px 40px #0b1524cc}
-  .event-thumb{width:112px;height:112px;border-radius:12px;object-fit:cover;background:#222}
+  /* 近期活動卡（無圖就不顯示縮圖） */
+  .home-event-list,.favorite-event-list{display:flex;flex-direction:column;gap:18px;align-items:center}
+  .event-card{background:#141a22;border:1px solid #233042;border-radius:18px;box-shadow:0 10px 28px #0b1524aa;padding:16px;display:flex;gap:14px;width:100%;max-width:780px}
+  .event-thumb{width:112px;height:112px;border-radius:12px;object-fit:cover;background:#222;display:block}
   .event-info{flex:1 1 0;display:flex;flex-direction:column;gap:6px}
   .event-name{font-weight:800;color:#bfe1ff}
-  .event-line{color:#b9cade}
+  .event-line{color:#cbd8ea}
 
-  /* ── Modal / Toast ────────────────────────────────────── */
+  /* Modal / Toast */
   .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;justify-content:center;align-items:center;z-index:1000}
-  .modal{background:#13181f;color:var(--ink);padding:20px;border-radius:14px;max-width:720px;width:94%;position:relative;box-shadow:0 8px 40px #1b2436b5;animation:fadeSlideIn .28s ease-out both;max-height:90vh;overflow:auto;border:1px solid #2c3a4c}
+  .modal{background:#13181f;color:var(--ink);padding:20px;border-radius:14px;max-width:720px;width:94%;position:relative;box-shadow:0 8px 40px #1b2436b5;max-height:90vh;overflow:auto;border:1px solid #2c3a4c}
   .modal-close{position:absolute;top:10px;right:10px;font-size:20px;cursor:pointer;color:#a6bad8}
   .promo-wrap{background:#0d1218;border-radius:12px;padding:10px;margin-bottom:12px;border:1px solid #2d3a49}
   .promo-img{width:100%;height:auto;max-height:70vh;object-fit:contain;display:block;margin:0 auto}
   .toast{visibility:hidden;position:fixed;top:18px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:10px 18px;border-radius:8px;font-size:15px;z-index:9999;opacity:0;transition:opacity .32s}
   .toast.show{visibility:visible;opacity:1}
 
-  /* ── 行事曆（月檢視：無需左右滑、每格最多 3 筆 + N） ── */
+  /* ===== 行事曆（月檢視 iOS 風，只顯示活動名稱） ===== */
   :root{ --cell-h:86px; --grid-gap:6px }
-  .calendar-header-dark{
-    display:flex;justify-content:center;align-items:center;gap:10px;background:var(--panel);
-    padding:14px 0 10px;border-radius:14px 14px 0 0;box-shadow:var(--shadow-1);flex-wrap:wrap
-  }
+  .calendar-header-dark{display:flex;justify-content:center;align-items:center;gap:10px;background:var(--panel);padding:14px 0 10px;border-radius:14px 14px 0 0;box-shadow:var(--shadow-1)}
   .calendar-outer-dark{background:var(--panel);border-radius:0 0 16px 16px;box-shadow:var(--shadow-2);padding:0 0 12px}
   .weekday-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:var(--grid-gap);padding:10px 10px 6px}
   .weekday{text-align:center;color:#cfd9e8;font-weight:800;font-size:.95rem}
   .month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:var(--grid-gap);padding:0 10px 12px}
   .day-cell{min-height:var(--cell-h);background:#11161c;border:1px solid #223142;border-radius:12px;padding:6px 6px 8px;position:relative}
   .day-cell:hover{background:#151b22}
-  .date-label-dark{display:flex;align-items:center;gap:6px;font-size:1rem}
+  .date-label-dark{display:flex;align-items:center;gap:6px}
   .day-num{color:#eef3ff;font-weight:800;font-size:1.04rem;padding:.5px 8px;border-radius:10px}
   .day-num.is-today{background:var(--accent);color:#fff}
   .day-num.is-selected{background:#3a4a62;color:#fff;box-shadow:0 0 0 2px #3a4a62aa inset}
   .evt-col{margin-top:4px;display:flex;flex-direction:column;gap:4px}
   .evt-pill{font-size:.92rem;background:#22b6ed;color:#fff;border-radius:8px;padding:2px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .evt-more{position:absolute;right:6px;bottom:4px;font-size:.85rem;color:#b5d4fc}
+  .evt-ellipsis{position:absolute;right:6px;bottom:4px;font-size:1.1rem;color:#b5d4fc;user-select:none}
   @media (max-width:420px){
     :root{ --cell-h:78px }
     .weekday{font-size:.86rem}
@@ -105,17 +95,16 @@
     .evt-pill{font-size:.88rem}
   }
 
-  /* ── Auth ─────────────────────────────────────────────── */
+  /* Auth 卡片（手機直排） */
   .auth-wrap{display:grid;gap:18px;grid-template-columns:1fr 1fr}
   .auth-card{background:var(--panel-2);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow-2)}
   .auth-title{margin:0 0 10px;color:#e6f1ff;font-weight:800}
   @media (max-width:720px){ .auth-wrap{grid-template-columns:1fr} }
 
-  /* contact */
   .contact-info a{color:#80c7ff}
 </style>
 
-<!-- Firebase compat（單檔 HTML 方便使用） -->
+<!-- Firebase compat -->
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
@@ -125,7 +114,7 @@
 <header>
   <div class="navbar">
     <div class="brand-wrap">
-      <!-- 換 Logo 圖片（不顯示文字） -->
+      <!-- Logo 圖片；不再顯示 KEVENTS 字樣 -->
       <img src="logo draft.png" alt="KEVENTS" class="logo-img">
     </div>
     <nav id="topNav">
@@ -144,7 +133,7 @@
 <!-- 首頁 -->
 <section id="home" class="page active">
   <div class="hero">
-    <!-- ★ 首頁大圖填滿：直接換檔名即可 -->
+    <!-- 首頁大圖：填滿 -->
     <img src="IMG_0441.jpeg" alt="hero">
   </div>
 
@@ -154,7 +143,7 @@
   </div>
 </section>
 
-<!-- 行事曆 -->
+<!-- 行事曆（僅此區塊的排版有改） -->
 <section id="calendar" class="page">
   <div class="calendar-header-dark">
     <div style="display:flex;gap:8px;align-items:center;">
@@ -178,7 +167,7 @@
   </div>
 </section>
 
-<!-- 登入 / 註冊（手機直排） -->
+<!-- 登入 / 註冊 -->
 <section id="loginRegister" class="page">
   <div class="auth-wrap">
     <div class="auth-card">
@@ -187,20 +176,15 @@
         <input class="input-dark" type="text" id="username" placeholder="帳號">
         <input class="input-dark" type="password" id="password" placeholder="密碼">
       </div>
-      <div style="margin-top:10px;">
-        <button class="btn btn-default" onclick="handleLogin()">登入</button>
-      </div>
+      <div style="margin-top:10px;"><button class="btn btn-default" onclick="handleLogin()">登入</button></div>
     </div>
-
     <div class="auth-card">
       <h3 class="auth-title">註冊</h3>
       <div class="form-grid">
         <input class="input-dark" type="text" id="newUsername" placeholder="新帳號">
         <input class="input-dark" type="password" id="newPassword" placeholder="新密碼">
       </div>
-      <div style="margin-top:10px;">
-        <button class="btn btn-blue" onclick="handleRegister()">註冊</button>
-      </div>
+      <div style="margin-top:10px;"><button class="btn btn-blue" onclick="handleRegister()">註冊</button></div>
     </div>
   </div>
 </section>
@@ -226,17 +210,16 @@
       <label style="color:#cfe3ff;">宣傳照（可空白）：<input class="input-dark" style="padding:7px" type="file" id="eventImageFile" accept="image/*" onchange="previewImage(this)"></label>
       <img id="previewImg" style="display:none;max-width:200px;max-height:130px;border-radius:10px;border:1px solid #2d3a49;object-fit:cover">
     </div>
-    <div style="margin-top:10px;">
-      <button class="btn btn-default" onclick="addEvent()">新增活動</button>
-    </div>
+    <div style="margin-top:10px;"><button class="btn btn-default" onclick="addEvent()">新增活動</button></div>
   </div>
 </section>
 
 <div id="modalContainer"></div>
 <div id="toast" class="toast"></div>
 
+<!-- Firebase + App -->
 <script>
-/* ============ Firebase 初始化 ============ */
+/* Firebase 初始化 */
 const firebaseConfig = {
   apiKey: "AIzaSyCUlK8CCnDsEcgJxTjm2X84oR812ChheRw",
   authDomain: "kevents-ae1c1.firebaseapp.com",
@@ -250,148 +233,97 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 firebase.auth().signInAnonymously().catch(console.error);
 
-/* ============ Local 狀態 ============ */
+/* Local 狀態 */
 let users   = JSON.parse(localStorage.getItem('users'))   || {};
 let events  = JSON.parse(localStorage.getItem('events'))  || [];
 let favorites = JSON.parse(localStorage.getItem('favorites')) || {};
 let currentUser = null;
 let currentMonth = new Date().getMonth();
 let currentYear  = new Date().getFullYear();
-let selectedDayInMonth = null;   // 非本月選取高亮
+let selectedDayInMonth = null;
 let uploadedImageBase64 = "";
 
-/* ============ 雲端 CRUD ============ */
-async function cloudLoadEvents() {
-  const snap = await db.collection('events').get();
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-}
-async function cloudAddEvent(obj) {
-  const ref = await db.collection('events').add(obj);
-  return ref.id;
-}
-async function cloudDeleteEvent(id) {
-  await db.collection('events').doc(id).delete();
-}
-async function cloudUpsertUser(username, userObj) {
-  await db.collection('users').doc(username).set(userObj, { merge: true });
-}
-async function cloudLoadUserOnce(username){
-  const doc = await db.collection('users').doc(username).get();
-  return doc.exists ? doc.data() : null;
-}
-async function cloudLoadUsers(){
-  const snap = await db.collection('users').get();
-  const obj = {}; snap.forEach(d => obj[d.id] = d.data()); return obj;
-}
-async function cloudLoadFavorites(username){
-  if (!username) return [];
-  const doc = await db.collection('favorites').doc(username).get();
-  return doc.exists ? (doc.data().items || []) : [];
-}
-async function cloudSaveFavorites(username, items){
-  if (!username) return;
-  await db.collection('favorites').doc(username).set({ items }, { merge: true });
-}
+/* CRUD */
+async function cloudLoadEvents(){ const s=await db.collection('events').get(); return s.docs.map(d=>({id:d.id,...d.data()})); }
+async function cloudAddEvent(o){ const ref=await db.collection('events').add(o); return ref.id; }
+async function cloudDeleteEvent(id){ await db.collection('events').doc(id).delete(); }
+async function cloudUpsertUser(u,obj){ await db.collection('users').doc(u).set(obj,{merge:true}); }
+async function cloudLoadUserOnce(u){ const d=await db.collection('users').doc(u).get(); return d.exists?d.data():null; }
+async function cloudLoadUsers(){ const s=await db.collection('users').get(); const o={}; s.forEach(d=>o[d.id]=d.data()); return o; }
+async function cloudLoadFavorites(u){ if(!u) return []; const d=await db.collection('favorites').doc(u).get(); return d.exists?(d.data().items||[]):[]; }
+async function cloudSaveFavorites(u,items){ if(!u)return; await db.collection('favorites').doc(u).set({items},{merge:true}); }
 
-/* 刪除活動時，從所有收藏中移除 */
-async function cloudPurgeFavoritesForAll(deletedEvent) {
-  try {
-    const favSnap = await db.collection('favorites').get();
-    const batch = db.batch();
-    favSnap.forEach(doc => {
-      const data = doc.data() || {};
-      const items = data.items || [];
-      const filtered = items.filter(e => !(e.id ? e.id === deletedEvent.id
-                                           : (e.name===deletedEvent.name && e.time===deletedEvent.time && e.org===deletedEvent.org && e.location===deletedEvent.location)));
-      if (filtered.length !== items.length) {
-        batch.set(doc.ref, { items: filtered }, { merge: true });
-      }
+/* 刪除時清收藏 */
+async function cloudPurgeFavoritesForAll(deleted){
+  try{
+    const snap=await db.collection('favorites').get(); const batch=db.batch();
+    snap.forEach(doc=>{
+      const data=doc.data()||{}; const items=data.items||[];
+      const filtered=items.filter(e=> !(e.id? e.id===deleted.id : (e.name===deleted.name && e.time===deleted.time && e.org===deleted.org && e.location===deleted.location)));
+      if(filtered.length!==items.length) batch.set(doc.ref,{items:filtered},{merge:true});
     });
     await batch.commit();
-  } catch (e) { console.warn(e); }
-}
-
-/* 即時訂閱（events） */
-function subscribeEventsRealtime(){
-  return db.collection('events').onSnapshot(snap=>{
-    events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    localStorage.setItem('events', JSON.stringify(events));
-    renderCalendar(currentMonth, currentYear);
-    updateHomeEvents();
-    if (currentUser) renderFavorites();
-  }, err => console.warn('events onSnapshot error', err));
-}
-
-/* ============ Admin 種子 ============ */
-async function seedAdminTony(){
-  try{
-    users = JSON.parse(localStorage.getItem('users')) || users || {};
-    if (!users['Tony'] || users['Tony'].password !== '961002' || users['Tony'].isAdmin !== true) {
-      users['Tony'] = { password: '961002', isAdmin:true };
-      localStorage.setItem('users', JSON.stringify(users));
-    }
-    await cloudUpsertUser('Tony', { password:'961002', isAdmin:true });
   }catch(e){ console.warn(e); }
 }
 
-/* ============ Navbar 底線 ============ */
+/* Realtime events */
+function subscribeEventsRealtime(){
+  return db.collection('events').onSnapshot(s=>{
+    events=s.docs.map(d=>({id:d.id,...d.data()}));
+    localStorage.setItem('events',JSON.stringify(events));
+    renderCalendar(currentMonth,currentYear); updateHomeEvents(); if(currentUser) renderFavorites();
+  });
+}
+
+/* Tony Admin */
+async function seedAdminTony(){
+  users = JSON.parse(localStorage.getItem('users')) || users || {};
+  if (!users['Tony'] || users['Tony'].password!=='961002' || !users['Tony'].isAdmin){
+    users['Tony']={password:'961002',isAdmin:true}; localStorage.setItem('users',JSON.stringify(users));
+  }
+  await cloudUpsertUser('Tony',{password:'961002',isAdmin:true});
+}
+
+/* Navbar underline */
 function moveUnderline(el){
-  const nav = document.getElementById('topNav');
-  const u = document.getElementById('navUnderline');
-  if (!el) { u.style.width='0px'; return; }
-  const rect = el.getBoundingClientRect();
-  const parentRect = nav.getBoundingClientRect();
-  const left = rect.left - parentRect.left + nav.scrollLeft;
-  u.style.width = rect.width + 'px';
-  u.style.transform = `translateX(${left}px)`;
-  u.style.opacity = 1;
+  const nav=document.getElementById('topNav'); const u=document.getElementById('navUnderline');
+  if(!el){u.style.width='0px';return;}
+  const r=el.getBoundingClientRect(); const p=nav.getBoundingClientRect(); const left=r.left-p.left+nav.scrollLeft;
+  u.style.width=r.width+'px'; u.style.transform=`translateX(${left}px)`; u.style.opacity=1;
 }
 
-/* ============ 共用工具 ============ */
-function isViewingCurrentMonth(year, month){
-  const now = new Date(); return now.getFullYear()===year && now.getMonth()===month;
-}
+/* 小工具 */
 function previewImage(input){
-  const file = input.files[0]; const img = document.getElementById('previewImg');
-  if (file){ const reader = new FileReader(); reader.onload = e => { uploadedImageBase64 = e.target.result; img.src = e.target.result; img.style.display='block'; }; reader.readAsDataURL(file); }
-  else { img.src=''; img.style.display='none'; uploadedImageBase64=''; }
+  const f=input.files[0], img=document.getElementById('previewImg');
+  if(f){ const rd=new FileReader(); rd.onload=e=>{uploadedImageBase64=e.target.result; img.src=e.target.result; img.style.display='block';}; rd.readAsDataURL(f);}
+  else{ img.src=''; img.style.display='none'; uploadedImageBase64=''; }
 }
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
 
-/* ============ Auth ============ */
+/* Auth */
 async function handleRegister(){
-  const username = document.getElementById('newUsername').value.trim();
-  const password = document.getElementById('newPassword').value;
-  if (!username || !password) return showToast('請輸入帳號與密碼');
-  if (users[username]) return showToast('帳號已存在');
-  users[username] = { password, isAdmin:false };
-  localStorage.setItem('users', JSON.stringify(users));
-  try{ await cloudUpsertUser(username, users[username]); }catch(e){ console.warn(e); }
+  const u=document.getElementById('newUsername').value.trim();
+  const p=document.getElementById('newPassword').value;
+  if(!u||!p) return showToast('請輸入帳號與密碼');
+  if(users[u]) return showToast('帳號已存在');
+  users[u]={password:p,isAdmin:false}; localStorage.setItem('users',JSON.stringify(users));
+  try{ await cloudUpsertUser(u,users[u]); }catch(e){console.warn(e);}
   showToast('註冊成功，請登入');
 }
 async function handleLogin(){
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value;
-
-  let user = users[username];
-  if (!user) {
-    try { const cloudUser = await cloudLoadUserOnce(username);
-      if (cloudUser){ users[username]=cloudUser; localStorage.setItem('users', JSON.stringify(users)); user = cloudUser; }
-    } catch(e){ console.warn(e); }
-  }
-  if (!user || user.password !== password) return showToast('帳號或密碼錯誤');
-
-  currentUser = username;
+  const u=document.getElementById('username').value.trim();
+  const p=document.getElementById('password').value;
+  let user=users[u];
+  if(!user){ try{ const cu=await cloudLoadUserOnce(u); if(cu){users[u]=cu; localStorage.setItem('users',JSON.stringify(users)); user=cu;}}catch(e){} }
+  if(!user||user.password!==p) return showToast('帳號或密碼錯誤');
+  currentUser=u;
   document.getElementById('personalLink').style.display='inline';
   document.getElementById('logoutLink').style.display='inline';
   document.getElementById('loginLink').style.display='none';
-  document.getElementById('adminLink').style.display = user.isAdmin ? 'inline' : 'none';
-  showPage('home', document.querySelector('nav a[data-page="home"]'));
+  document.getElementById('adminLink').style.display=user.isAdmin?'inline':'none';
+  showPage('home',document.querySelector('nav a[data-page="home"]'));
   showToast('登入成功');
-
-  try{
-    const items = await cloudLoadFavorites(currentUser);
-    favorites[currentUser] = items; localStorage.setItem('favorites', JSON.stringify(favorites));
-  }catch(e){ console.warn(e); }
+  try{ const items=await cloudLoadFavorites(currentUser); favorites[currentUser]=items; localStorage.setItem('favorites',JSON.stringify(favorites)); }catch(e){}
   renderFavorites(); updateHomeEvents();
 }
 function handleLogout(){
@@ -400,94 +332,75 @@ function handleLogout(){
   document.getElementById('adminLink').style.display='none';
   document.getElementById('logoutLink').style.display='none';
   document.getElementById('loginLink').style.display='inline';
-  showPage('home', document.querySelector('nav a[data-page="home"]'));
-  currentUser = null;
+  showPage('home',document.querySelector('nav a[data-page="home"]'));
+  currentUser=null;
 }
 
-/* ============ 活動：新增/刪除（以 id 對應，避免刪錯） ============ */
+/* 活動：新增/刪除（id 對應避免刪錯） */
 async function addEvent(){
-  if (!currentUser || !users[currentUser]?.isAdmin) return showToast('僅限管理員新增活動');
-  const obj = {
-    name: document.getElementById('eventName').value.trim() || '',
-    org:  document.getElementById('eventOrg').value.trim() || '',
-    time: document.getElementById('eventTime').value || '',
-    location: document.getElementById('eventLocation').value.trim() || '',
-    price: document.getElementById('eventPrice').value.trim() || '',
-    social:document.getElementById('eventSocial').value.trim() || '',
-    desc: document.getElementById('eventDesc').value.trim() || '',
-    image: uploadedImageBase64 || ''
+  if(!currentUser||!users[currentUser]?.isAdmin) return showToast('僅限管理員新增活動');
+  const obj={
+    name:document.getElementById('eventName').value.trim()||'',
+    org:document.getElementById('eventOrg').value.trim()||'',
+    time:document.getElementById('eventTime').value||'',
+    location:document.getElementById('eventLocation').value.trim()||'',
+    price:document.getElementById('eventPrice').value.trim()||'',
+    social:document.getElementById('eventSocial').value.trim()||'',
+    desc:document.getElementById('eventDesc').value.trim()||'',
+    image:uploadedImageBase64||''
   };
-  try{
-    const id = await cloudAddEvent(obj);
-    events.push({ id, ...obj });
-    localStorage.setItem('events', JSON.stringify(events));
-  }catch(e){
-    console.warn('Cloud add failed', e);
-    events.push(obj); // 本地暫存
-    localStorage.setItem('events', JSON.stringify(events));
-  }
+  try{ const id=await cloudAddEvent(obj); events.push({id,...obj}); }
+  catch(e){ console.warn(e); events.push(obj); }
+  localStorage.setItem('events',JSON.stringify(events));
   ['eventName','eventOrg','eventTime','eventLocation','eventPrice','eventSocial','eventDesc'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('eventImageFile').value=''; uploadedImageBase64=''; document.getElementById('previewImg').style.display='none';
   renderCalendar(currentMonth,currentYear); updateHomeEvents(); showToast('活動新增成功');
 }
-
 function requestDeleteEventById(id){
-  if (!currentUser || !users[currentUser]?.isAdmin) return showToast('僅限管理員刪除活動');
-  // 自製確認框
-  const container = document.getElementById('modalContainer');
-  container.innerHTML = `
-    <div class="modal-overlay">
-      <div class="modal" onclick="event.stopPropagation()">
-        <span class="modal-close" onclick="closeModal()">×</span>
-        <h3>確認</h3>
-        <p>確定要刪除這個活動嗎？</p>
-        <div style="display:flex;justify-content:flex-end;gap:10px;">
-          <button class="btn btn-default" onclick="doDeleteEventById('${id || ''}')">確定</button>
-          <button class="btn btn-danger" onclick="closeModal()">取消</button>
-        </div>
-      </div>
-    </div>`;
-  const overlay=document.querySelector('.modal-overlay'); overlay.onclick=(e)=>{ if(e.target===overlay) closeModal(); };
+  if(!currentUser||!users[currentUser]?.isAdmin) return showToast('僅限管理員刪除活動');
+  const c=document.getElementById('modalContainer');
+  c.innerHTML=`<div class="modal-overlay"><div class="modal" onclick="event.stopPropagation()">
+  <span class="modal-close" onclick="closeModal()">×</span><h3>確認</h3><p>確定要刪除這個活動嗎？</p>
+  <div style="display:flex;justify-content:flex-end;gap:10px;">
+    <button class="btn btn-default" onclick="doDeleteEventById('${id||''}')">確定</button>
+    <button class="btn btn-danger" onclick="closeModal()">取消</button></div></div></div>`;
+  const ov=document.querySelector('.modal-overlay'); ov.onclick=e=>{if(e.target===ov) closeModal();};
 }
-
 async function doDeleteEventById(id){
-  const idx = events.findIndex(e => e.id === id);
-  const deleted = idx >=0 ? events[idx] : null;
-  try{ if (id) await cloudDeleteEvent(id); }catch(e){ console.warn('Cloud delete failed', e); }
-  if (idx>=0) { events.splice(idx,1); localStorage.setItem('events', JSON.stringify(events)); }
-  if (deleted) { await cloudPurgeFavoritesForAll(deleted); }
-  closeModal();
-  renderCalendar(currentMonth,currentYear); updateHomeEvents(); if (currentUser) renderFavorites();
+  const idx=events.findIndex(e=>e.id===id);
+  const deleted=idx>=0?events[idx]:null;
+  try{ if(id) await cloudDeleteEvent(id);}catch(e){console.warn(e);}
+  if(idx>=0){ events.splice(idx,1); localStorage.setItem('events',JSON.stringify(events)); }
+  if(deleted) await cloudPurgeFavoritesForAll(deleted);
+  closeModal(); renderCalendar(currentMonth,currentYear); updateHomeEvents(); if(currentUser) renderFavorites();
   showToast('已刪除活動');
 }
+function closeModal(){ document.getElementById('modalContainer').innerHTML=''; }
 
-/* ============ 收藏 ============ */
+/* 收藏 */
 function addFavorite(evt){
   if(!currentUser) return;
   favorites[currentUser]=favorites[currentUser]||[];
-  const exists = favorites[currentUser].some(e => (e.id && evt.id) ? e.id===evt.id : (e.name===evt.name && e.time===evt.time && e.org===evt.org && e.location===evt.location));
+  const exists=favorites[currentUser].some(e=> (e.id&&evt.id)? e.id===evt.id : (e.name===evt.name && e.time===evt.time));
   if(!exists){
-    const lite = { id:evt.id||null, name:evt.name||'', org:evt.org||'', time:evt.time||'', location:evt.location||'', price:evt.price||'', social:evt.social||'', desc:evt.desc||'', image:evt.image||'' };
-    favorites[currentUser].push(lite);
-    localStorage.setItem('favorites', JSON.stringify(favorites));
-    cloudSaveFavorites(currentUser, favorites[currentUser]).catch(console.error);
+    favorites[currentUser].push({id:evt.id||null,name:evt.name||'',org:evt.org||'',time:evt.time||'',location:evt.location||'',price:evt.price||'',social:evt.social||'',desc:evt.desc||'',image:evt.image||''});
+    localStorage.setItem('favorites',JSON.stringify(favorites));
+    cloudSaveFavorites(currentUser,favorites[currentUser]).catch(console.error);
     renderFavorites(); updateHomeEvents(); showToast('已加入收藏');
   }else showToast('已收藏過');
 }
-function removeFavorite(index){
-  favorites[currentUser].splice(index,1);
-  localStorage.setItem('favorites', JSON.stringify(favorites));
-  cloudSaveFavorites(currentUser, favorites[currentUser]).catch(console.error);
+function removeFavorite(i){
+  favorites[currentUser].splice(i,1);
+  localStorage.setItem('favorites',JSON.stringify(favorites));
+  cloudSaveFavorites(currentUser,favorites[currentUser]).catch(console.error);
   renderFavorites(); updateHomeEvents(); showToast('已取消收藏');
 }
 
-/* ============ 首頁近期活動（無圖就不顯示圖片框） ============ */
+/* 首頁近期活動（無圖不顯示縮圖） */
 function updateHomeEvents(){
-  const list = document.getElementById('homeEvents'); list.innerHTML='';
+  const list=document.getElementById('homeEvents'); list.innerHTML='';
   const now=new Date(); const today=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-  const sorted=[...events].filter(e=>e.time && e.time.substr(0,10)>=today)
-    .sort((a,b)=>(a.time||'').localeCompare(b.time||'')).slice(0,3);
-
+  const sorted=[...events].filter(e=>e.time && e.time.substr(0,10)>=today).sort((a,b)=>(a.time||'').localeCompare(b.time||'')).slice(0,3);
   sorted.forEach(evt=>{
     const card=document.createElement('div'); card.className='event-card';
     if(evt.image){ const img=document.createElement('img'); img.className='event-thumb'; img.src=evt.image; img.alt='宣傳照'; card.appendChild(img); }
@@ -496,157 +409,91 @@ function updateHomeEvents(){
                     <div class="event-line">主辦單位：${evt.org||''}</div>
                     <div class="event-line">時間：${evt.time?evt.time.replace('T',' '):''}</div>`;
     card.appendChild(info);
-
-    // 收藏（只在首頁或詳細頁面）
     if(currentUser){
-      const isFaved=(favorites[currentUser]||[]).some(e => (e.id&&evt.id)? e.id===evt.id : (e.name===evt.name && e.time===evt.time));
-      const favBtn=document.createElement('button'); favBtn.className='btn btn-blue'+(isFaved?' btn-disabled':''); favBtn.textContent=isFaved?'已收藏':'收藏'; favBtn.disabled=isFaved;
-      favBtn.onclick=(e)=>{ e.stopPropagation(); if(!isFaved) addFavorite(evt); };
-      card.appendChild(favBtn);
+      const isFaved=(favorites[currentUser]||[]).some(e=> (e.id&&evt.id)? e.id===evt.id : (e.name===evt.name && e.time===evt.time));
+      const fav=document.createElement('button'); fav.className='btn btn-blue'+(isFaved?' btn-disabled':''); fav.textContent=isFaved?'已收藏':'收藏'; fav.disabled=isFaved;
+      fav.onclick=()=>{ if(!isFaved) addFavorite(evt); };
+      card.appendChild(fav);
     }
-    // 詳細/刪除
     const more=document.createElement('button'); more.className='btn btn-default'; more.textContent='詳細';
-    more.onclick=()=> showEventDetailById(evt.id);
-    card.appendChild(more);
-
+    more.onclick=()=> showEventDetailById(evt.id||''); card.appendChild(more);
     if(currentUser && users[currentUser]?.isAdmin){
       const del=document.createElement('button'); del.className='btn btn-danger'; del.textContent='刪除';
-      del.onclick=()=> requestDeleteEventById(evt.id || '');
-      card.appendChild(del);
+      del.onclick=()=> requestDeleteEventById(evt.id||''); card.appendChild(del);
     }
     list.appendChild(card);
   });
 }
 
-/* ============ 詳細彈窗（完整顯示宣傳照） ============ */
+/* 詳細彈窗 */
 function showEventDetailById(id){
-  const idx = events.findIndex(e => e.id === id);
-  const evt = idx>=0 ? events[idx] : null;
-  if (!evt) return;
-
-  let isFaved=false;
+  const evt=events.find(e=>e.id===id)||null; if(!evt) return;
+  let isFaved=false; if(currentUser){isFaved=(favorites[currentUser]||[]).some(e=>(e.id&&evt.id)? e.id===evt.id : (e.name===evt.name && e.time===evt.time));}
+  const c=document.getElementById('modalContainer');
+  const img=evt.image?`<div class="promo-wrap"><img class="promo-img" src="${evt.image}" alt="宣傳照"></div>`:'';
+  c.innerHTML=`<div class="modal-overlay"><div class="modal" onclick="event.stopPropagation()">
+    <span class="modal-close" onclick="closeModal()">×</span>
+    ${img}
+    <h3 style="margin:.2rem 0 .2rem;">${evt.name||'未命名活動'}</h3>
+    <p>主辦單位：${evt.org||''}</p>
+    <p>時間：${evt.time?evt.time.replace('T',' '):''}</p>
+    <p>地點：${evt.location||''}</p>
+    <p>票價：${evt.price||''}</p>
+    ${evt.desc? `<p>簡介：${evt.desc}</p>`:''}
+    ${evt.social? `<p><a href="${evt.social}" target="_blank" style="color:#80c7ff">社群連結</a></p>`:''}
+    ${currentUser? `<button id="favInDetail" class="btn btn-blue${isFaved?' btn-disabled':''}" ${isFaved?'disabled':''}>${isFaved?'已收藏':'收藏'}</button>`:''}
+    ${(currentUser && users[currentUser]?.isAdmin)? `<button class="btn btn-danger" style="margin-left:10px;" onclick="requestDeleteEventById('${evt.id||''}')">刪除活動</button>`:''}
+  </div></div>`;
   if(currentUser){
-    isFaved=(favorites[currentUser]||[]).some(e => (e.id && evt.id) ? e.id===evt.id : (e.name===evt.name && e.time===evt.time && e.org===evt.org && e.location===evt.location));
+    const f=document.getElementById('favInDetail');
+    if(f && !isFaved){ f.onclick=()=>{ addFavorite(evt); f.classList.add('btn-disabled'); f.disabled=true; f.textContent='已收藏'; }; }
   }
-
-  const container=document.getElementById('modalContainer');
-  const imgBlock = evt.image ? `<div class="promo-wrap"><img class="promo-img" src="${evt.image}" alt="宣傳照"></div>` : '';
-  container.innerHTML=`
-    <div class="modal-overlay">
-      <div class="modal" onclick="event.stopPropagation()">
-        <span class="modal-close" onclick="closeModal()">×</span>
-        ${imgBlock}
-        <h3 style="margin:.2rem 0 .2rem;">${evt.name||'未命名活動'}</h3>
-        <p>主辦單位：${evt.org||''}</p>
-        <p>時間：${evt.time?evt.time.replace('T',' '):''}</p>
-        <p>地點：${evt.location||''}</p>
-        <p>票價：${evt.price||''}</p>
-        ${evt.desc? `<p>簡介：${evt.desc}</p>`:''}
-        ${evt.social? `<p><a href="${evt.social}" target="_blank" style="color:#80c7ff">社群連結</a></p>`:''}
-        ${currentUser? `<button id="favInDetail" class="btn btn-blue${isFaved?' btn-disabled':''}" ${isFaved?'disabled':''}>${isFaved?'已收藏':'收藏'}</button>`:''}
-        ${(currentUser && users[currentUser]?.isAdmin)? `<button class="btn btn-danger" style="margin-left:10px;" onclick="requestDeleteEventById('${evt.id||''}')">刪除活動</button>`:''}
-      </div>
-    </div>`;
-  if(currentUser){
-    const favBtn=document.getElementById('favInDetail');
-    if(favBtn && !isFaved){ favBtn.onclick=(e)=>{ e.stopPropagation(); addFavorite(evt); favBtn.classList.add('btn-disabled'); favBtn.disabled=true; favBtn.textContent='已收藏'; }; }
-  }
-  const overlay=document.querySelector('.modal-overlay'); overlay.onclick=(e)=>{ if(e.target===overlay) closeModal(); };
-}
-function closeModal(){ document.getElementById('modalContainer').innerHTML=''; }
-
-/* ============ 個人收藏頁 ============ */
-function renderFavorites(){
-  const list=document.getElementById('favoritesList'); list.innerHTML='';
-  const favs=favorites[currentUser]||[]; if(favs.length===0){ list.innerHTML='<div style="opacity:.7;">目前沒有收藏任何活動</div>'; return; }
-  favs.forEach((evt,i)=>{
-    const card=document.createElement('div'); card.className='event-card';
-    if(evt.image){ const img=document.createElement('img'); img.className='event-thumb'; img.src=evt.image; img.alt='宣傳照'; card.appendChild(img); }
-    const info=document.createElement('div'); info.className='event-info';
-    info.innerHTML=`<div class="event-name">${evt.name||'未命名活動'}</div>
-                    <div class="event-line">主辦單位：${evt.org||''}</div>
-                    <div class="event-line">時間：${evt.time?evt.time.replace('T',' '):''}</div>`;
-    card.appendChild(info);
-    const unBtn=document.createElement('button'); unBtn.className='btn btn-danger'; unBtn.textContent='取消收藏';
-    unBtn.onclick=()=> removeFavorite(i);
-    card.appendChild(unBtn);
-    const more=document.createElement('button'); more.className='btn btn-default'; more.textContent='詳細';
-    more.onclick=()=> showEventDetailById(evt.id || '');
-    card.appendChild(more);
-    list.appendChild(card);
-  });
+  const ov=document.querySelector('.modal-overlay'); ov.onclick=e=>{if(e.target===ov) closeModal();};
 }
 
-/* ============ Page 切換（限制新增頁權限） ============ */
-function showPage(id, navEl=null){
-  if (id === 'addEvent') {
-    if (!currentUser || !users[currentUser]?.isAdmin) {
-      showToast('僅限管理員使用新增活動'); id = 'home';
-    }
-  }
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  const target=document.getElementById(id); if(target) target.classList.add('active');
-  if(id==='personal' && currentUser) renderFavorites();
-  if(id==='calendar') renderCalendar(currentMonth,currentYear);
-  if(!navEl) navEl=document.querySelector(`nav a[data-page="${id}"]`);
-  moveUnderline(navEl);
-}
-function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2600); }
-
-/* ============ 行事曆（月檢視：iOS 風） ============ */
-function buildMonthPill(evt) {
-  const eDiv = document.createElement('div');
-  eDiv.className = 'evt-pill';
-  eDiv.textContent = evt.name || '未命名活動';
-  eDiv.title = evt.name || '';
-  eDiv.onclick = (e) => { e.stopPropagation(); showEventDetailById(evt.id || ''); };
-  return eDiv;
-}
-function renderCalendar(month, year){
-  const container = document.getElementById('calendarContainer');
-  const title = document.getElementById('calendarTitle');
-  title.textContent = `${year} 年 ${month + 1} 月`;
+/* 行事曆（月檢視：整月可見，僅活動名稱；最多兩筆，超過顯示 …） */
+function renderCalendar(month,year){
+  const container=document.getElementById('calendarContainer');
+  const title=document.getElementById('calendarTitle');
+  title.textContent=`${year} 年 ${month+1} 月`;
 
   container.innerHTML = `
     <div class="weekday-grid">
-      ${['日','一','二','三','四','五','六'].map(d => `<div class="weekday">${d}</div>`).join('')}
+      ${['日','一','二','三','四','五','六'].map(d=>`<div class="weekday">${d}</div>`).join('')}
     </div>
     <div class="month-grid" id="monthGrid"></div>
   `;
-  const grid = document.getElementById('monthGrid');
+  const grid=document.getElementById('monthGrid');
 
-  const firstDay    = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const now = new Date();
-  const viewingCurrent = isViewingCurrentMonth(year, month);
+  const firstDay=new Date(year,month,1).getDay();
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const now=new Date(); const viewingCurrent=(now.getFullYear()===year && now.getMonth()===month);
 
-  // 前置空白
-  for(let i=0;i<firstDay;i++){
-    const empty=document.createElement('div'); empty.className='day-cell empty'; grid.appendChild(empty);
-  }
+  for(let i=0;i<firstDay;i++){ const e=document.createElement('div'); e.className='day-cell empty'; grid.appendChild(e); }
 
-  for(let date=1; date<=daysInMonth; date++){
+  for(let d=1; d<=daysInMonth; d++){
     const cell=document.createElement('div'); cell.className='day-cell';
-    const dateStr=`${year}-${String(month+1).padStart(2,'0')}-${String(date).padStart(2,'0')}`;
-    const isToday=viewingCurrent && (date===now.getDate());
+    const dateStr=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday=viewingCurrent && (d===now.getDate());
     let numClass='day-num'; if(isToday) numClass+=' is-today'; else if(!viewingCurrent && selectedDayInMonth===dateStr) numClass+=' is-selected';
-    cell.innerHTML = `<div class="date-label-dark"><span class="${numClass}">${date}</span></div>`;
+    cell.innerHTML=`<div class="date-label-dark"><span class="${numClass}">${d}</span></div>`;
 
-    const dayEvents = events
-      .map(e => ({...e}))
-      .filter(e => e.time && e.time.substr(0,10)===dateStr)
-      .sort((a,b)=>(a.time||'').localeCompare(b.time||''));
-
+    const dayEvents=events.filter(e=>e.time && e.time.substr(0,10)===dateStr).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
     if(dayEvents.length){
       const col=document.createElement('div'); col.className='evt-col';
-      dayEvents.slice(0,3).forEach(evt => col.appendChild(buildMonthPill(evt)));
+      dayEvents.slice(0,2).forEach(evt=>{
+        const pill=document.createElement('div'); pill.className='evt-pill';
+        pill.textContent=evt.name||'未命名活動';
+        pill.onclick=(e)=>{ e.stopPropagation(); showEventDetailById(evt.id||''); };
+        col.appendChild(pill);
+      });
       cell.appendChild(col);
-      if(dayEvents.length>3){
-        const more=document.createElement('div'); more.className='evt-more'; more.textContent = `+${dayEvents.length-3}`;
-        cell.appendChild(more);
+      if(dayEvents.length>2){
+        const dot=document.createElement('div'); dot.className='evt-ellipsis'; dot.textContent='…';
+        cell.appendChild(dot);
       }
       cell.style.cursor='pointer';
-      cell.onclick=()=>{ selectedDayInMonth=dateStr; showCalendarDayAll(dateStr, dayEvents); if(!viewingCurrent) renderCalendar(month,year); };
+      cell.onclick=()=> showCalendarDayAll(dateStr, dayEvents);
     }else{
       cell.style.cursor='pointer';
       cell.onclick=()=>{ selectedDayInMonth=dateStr; if(!viewingCurrent) renderCalendar(month,year); };
@@ -654,72 +501,60 @@ function renderCalendar(month, year){
     grid.appendChild(cell);
   }
 
-  // 尾端補足 6 週
-  const totalCells = firstDay + daysInMonth;
-  const remain = (7*6) - totalCells;
-  for(let i=0;i<remain;i++){ const empty=document.createElement('div'); empty.className='day-cell empty'; grid.appendChild(empty); }
+  const totalCells=firstDay+daysInMonth, remain=(7*6)-totalCells;
+  for(let i=0;i<remain;i++){ const e=document.createElement('div'); e.className='day-cell empty'; grid.appendChild(e); }
 }
-
-/* 當日所有活動（沿用原本 UI） */
 function showCalendarDayAll(dateStr, evts){
-  const container=document.getElementById('modalContainer');
-  container.innerHTML=`
-    <div class="modal-overlay">
-      <div class="modal" onclick="event.stopPropagation()">
-        <span class="modal-close" onclick="closeModal()">×</span>
-        <h3 style="margin-top:0;">${dateStr.replace(/-/g,'/')} 活動列表</h3>
-        <div style="max-height:360px;overflow:auto;">
-          ${evts.map(evt=>`
-            <div style="border-bottom:1px solid #345;margin-bottom:11px;padding-bottom:10px;">
-              <strong style="color:#6ec6ff;">${evt.name || '未命名活動'}</strong><br>
-              <button class="btn btn-default" style="margin-top:8px;" onclick="event.stopPropagation(); showEventDetailById('${evt.id||''}');">詳細</button>
-              ${(currentUser && users[currentUser]?.isAdmin)? `<button class="btn btn-danger" style="margin-left:8px;" onclick="event.stopPropagation(); requestDeleteEventById('${evt.id||''}');">刪除</button>`:''}
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    </div>`;
-  const overlay=document.querySelector('.modal-overlay'); overlay.onclick=(e)=>{ if(e.target===overlay) closeModal(); };
+  const c=document.getElementById('modalContainer');
+  c.innerHTML=`<div class="modal-overlay"><div class="modal" onclick="event.stopPropagation()">
+    <span class="modal-close" onclick="closeModal()">×</span>
+    <h3 style="margin-top:0;">${dateStr.replace(/-/g,'/')} 活動列表</h3>
+    <div style="max-height:360px;overflow:auto;">
+      ${evts.map(e=>`<div style="border-bottom:1px solid #345;margin-bottom:11px;padding-bottom:10px;">
+        <strong style="color:#6ec6ff;">${e.name||'未命名活動'}</strong><br>
+        <button class="btn btn-default" style="margin-top:8px;" onclick="event.stopPropagation(); showEventDetailById('${e.id||''}')">詳細</button>
+        ${(currentUser && users[currentUser]?.isAdmin)? `<button class="btn btn-danger" style="margin-left:8px;" onclick="event.stopPropagation(); requestDeleteEventById('${e.id||''}')">刪除</button>`:''}
+      </div>`).join('')}
+    </div></div></div>`;
+  const ov=document.querySelector('.modal-overlay'); ov.onclick=e=>{if(e.target===ov) closeModal();};
 }
 
 /* 月份切換 / 今天 */
 function changeMonth(offset){
-  currentMonth += offset;
-  if (currentMonth<0){ currentMonth=11; currentYear--; }
-  else if (currentMonth>11){ currentMonth=0; currentYear++; }
-  selectedDayInMonth = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-01`;
+  currentMonth+=offset;
+  if(currentMonth<0){ currentMonth=11; currentYear--; }
+  else if(currentMonth>11){ currentMonth=0; currentYear++; }
+  selectedDayInMonth=`${currentYear}-${String(currentMonth+1).padStart(2,'0')}-01`;
   renderCalendar(currentMonth,currentYear);
 }
 function goToday(){
-  const now=new Date(); currentYear=now.getFullYear(); currentMonth=now.getMonth();
-  selectedDayInMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const n=new Date(); currentYear=n.getFullYear(); currentMonth=n.getMonth();
+  selectedDayInMonth=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
   renderCalendar(currentMonth,currentYear);
 }
 
-/* ============ 啟動：先畫本地，後讀雲端，開訂閱 ============ */
-window.addEventListener('load', async () => {
-  try{
-    renderCalendar(currentMonth,currentYear);
-    updateHomeEvents();
-    moveUnderline(document.querySelector('nav a[data-page="home"]'));
-  }catch(_){}
+/* Page 切換 */
+function showPage(id,navEl=null){
+  if(id==='addEvent' && (!currentUser||!users[currentUser]?.isAdmin)){ showToast('僅限管理員使用新增活動'); id='home'; }
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const t=document.getElementById(id); if(t) t.classList.add('active');
+  if(id==='personal' && currentUser) renderFavorites();
+  if(id==='calendar') renderCalendar(currentMonth,currentYear);
+  moveUnderline(navEl||document.querySelector(`nav a[data-page="${id}"]`));
+}
 
-  // 先嘗試公讀
+/* 啟動 */
+window.addEventListener('load', async ()=>{
+  try{ renderCalendar(currentMonth,currentYear); updateHomeEvents(); moveUnderline(document.querySelector('nav a[data-page="home"]')); }catch(_){}
   try{
-    const ev = await cloudLoadEvents();
-    if (Array.isArray(ev)) {
-      events = ev; localStorage.setItem('events', JSON.stringify(events));
-      renderCalendar(currentMonth,currentYear); updateHomeEvents();
-    }
+    const ev=await cloudLoadEvents(); if(Array.isArray(ev)){ events=ev; localStorage.setItem('events',JSON.stringify(events)); renderCalendar(currentMonth,currentYear); updateHomeEvents(); }
   }catch(e){ console.warn('public fetch events failed', e); }
-
-  firebase.auth().onAuthStateChanged(async (user)=>{
-    if(!user) return;
+  firebase.auth().onAuthStateChanged(async (u)=>{
+    if(!u) return;
     try{
       await seedAdminTony();
-      users = await cloudLoadUsers(); localStorage.setItem('users', JSON.stringify(users));
-      const unSub = subscribeEventsRealtime();
-      window.addEventListener('beforeunload', ()=>{ try{ unSub && unSub(); }catch(_){} });
+      users=await cloudLoadUsers(); localStorage.setItem('users',JSON.stringify(users));
+      const unSub=subscribeEventsRealtime(); window.addEventListener('beforeunload',()=>{try{unSub&&unSub();}catch(_){}})
     }catch(e){ console.warn('init after auth failed', e); }
   });
 });
