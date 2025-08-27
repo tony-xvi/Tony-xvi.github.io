@@ -7,113 +7,179 @@
 
   <style>
     :root{
-      --bg:#181c21; --panel:#23262a; --panel-2:#222730; --ink:#eaeaea; --sub:#b0c9e2;
-      --brand:#6ec6ff; --line:#2a3545; --accent:#2599ff; --accent-2:#2ec67d; --danger:#e17055;
-      --input:#1e232b; --input-line:#2e3a4a; --input-focus:#3aa0ff;
-      --shadow-1: 0 2px 8px #0006; --shadow-2: 0 8px 32px #0005; --shadow-3: 0 18px 70px #06131f66;
+      /* 色票 */
+      --bg-deep:#0f1319;         /* 更深的底色，搭配漸層 */
+      --bg:#181c21;              /* 主要底色 */
+      --panel:#23262a;
+      --panel-2:#222730;
+      --ink:#f2f6ff;             /* 白字微帶藍 */
+      --sub:#cfe2ff;
+      --brand:#6ec6ff;
+      --line:#2a3545;
+      --accent:#2599ff;
+      --accent-2:#2ec67d;
+      --danger:#e17055;
+      --input:#1e232b;
+      --input-line:#2e3a4a;
+      --input-focus:#3aa0ff;
+
+      --shadow-1: 0 2px 8px #0006;
+      --shadow-2: 0 8px 32px #0005;
+      --shadow-3: 0 18px 70px #06131f66;
       --img-bg:#0f1319;
     }
+
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;font-family:'Noto Sans TC','Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+    body{
+      margin:0;
+      font-family:'Noto Sans TC','Segoe UI',Arial,sans-serif;
+      /* ★ 深色＋漸層（更有層次，但不會影響內容圖片顏色） */
+      background:
+        radial-gradient(130% 120% at 20% -10%, #1b222c 0%, #121720 55%, #0d1218 100%),
+        linear-gradient(180deg, #0f1319 0%, #111720 100%);
+      color:var(--ink);
+      min-height:100vh;
+    }
 
-    /* Navbar */
-    header{background:var(--panel);color:#fff;box-shadow:var(--shadow-1);position:sticky;top:0;z-index:10}
-    .navbar{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:60px}
-    .site-logo{font-size:2.05rem;font-weight:800;letter-spacing:1px;color:#fff;padding-right:48px;font-family:'Montserrat','Noto Sans TC',sans-serif}
-    nav{position:relative;display:flex;gap:22px;align-items:center}
-    nav a{color:#b5d4fc;text-decoration:none;font-weight:700;cursor:pointer;font-size:1.05rem;padding:7px 8px;border-radius:8px;transition:color .18s}
-    nav a:hover{color:#fff}
-    .nav-underline{position:absolute;bottom:6px;height:3px;background:var(--brand);border-radius:2px;transition:transform .28s ease,width .28s ease,opacity .25s;opacity:.95;pointer-events:none}
+    /* Navbar（加漸層、Logo 放大、手機可水平滑動） */
+    header{
+      background:
+        linear-gradient(180deg, rgba(40,45,52,1) 0%, rgba(32,36,42,0.98) 60%, rgba(28,31,35,0.96) 100%);
+      color:#fff;
+      box-shadow:var(--shadow-1);
+      position:sticky;top:0;z-index:10;
+      border-bottom:1px solid var(--line);
+    }
+    .navbar{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:10px 16px;height:auto;gap:16px;
+    }
+    /* ★ 換 Logo 圖片路徑即可；放大尺寸 */
+    .site-logo-img{
+      height:48px; width:auto; display:block; object-fit:contain;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,.35));
+    }
+    nav{
+      position:relative;
+      display:flex;align-items:center;gap:14px;
+      /* 手機優化：橫向滑動、不換行 */
+      overflow-x:auto; white-space:nowrap; -webkit-overflow-scrolling:touch;
+      scrollbar-width:none;
+      max-width:100%;
+    }
+    nav::-webkit-scrollbar{display:none}
+    /* 小字改淺色＋觸控區加大 */
+    nav a{
+      color:#e8eef8;text-decoration:none;font-weight:700;cursor:pointer;
+      font-size:1rem;padding:10px 12px;border-radius:10px;
+      transition:color .18s,background .18s,transform .12s;
+    }
+    nav a:hover{color:#fff;background:#2a3342}
+    .nav-underline{
+      position:absolute;bottom:4px;height:3px;background:var(--brand);
+      border-radius:2px;transition:transform .28s ease,width .28s ease,opacity .25s;
+      opacity:.95;pointer-events:none
+    }
 
-    /* Page */
-    .page{display:none;padding:38px 6vw 0 6vw;opacity:0;transform:translateY(6px)}
+    /* Page（增加與 Logo 的視覺間隔） */
+    .page{display:none;padding:32px 4vw 0;opacity:0;transform:translateY(6px)}
     .page.active{display:block;animation:fadeSlideIn .38s ease-out forwards}
     @keyframes fadeSlideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-    /* 首頁封面 */
-    .cover-photo-frame{width:100%;max-width:1180px;margin:14px auto 28px;border-radius:24px;padding:12px;background:radial-gradient(120% 120% at 50% 50%,rgba(24,28,33,0) 70%,rgba(24,28,33,1) 100%);box-shadow:var(--shadow-3)}
-    .cover-photo-box{border-radius:16px;overflow:hidden;display:block;background:transparent}
-    .cover-photo{display:block;width:100%;height:auto;-webkit-user-select:none;user-select:none}
+    /* 首頁封面：滿版、無灰邊 */
+    .cover-photo-frame{width:100%;max-width:100%;margin:0 auto 20px;border-radius:0;padding:0;background:none;box-shadow:none}
+    .cover-photo-box{border-radius:0;overflow:hidden;background:transparent}
+    .cover-photo{display:block;width:100%;height:auto;user-select:none}
 
-    .home-section{background:var(--panel);border-radius:22px;margin:20px 0 26px;padding:30px 32px;box-shadow:var(--shadow-1)}
-    .section-title{margin:0 0 22px;font-size:1.34rem;color:#b5d4fc;font-weight:800;letter-spacing:1px}
+    .home-section{background:var(--panel);border-radius:20px;margin:18px 0 24px;padding:22px 18px;box-shadow:var(--shadow-1)}
+    .section-title{margin:0 0 16px;font-size:1.16rem;color:#eef5ff;font-weight:800;letter-spacing:.4px}
 
     /* 卡片（近期活動/收藏） */
-    .home-event-list,.favorite-event-list{display:flex;flex-direction:column;gap:26px;width:100%;align-items:center;margin:0;padding:0}
-    .event-card{background:var(--panel-2);border-radius:20px;box-shadow:0 8px 28px #0b1524aa;padding:22px 28px 20px;width:100%;max-width:780px;min-height:160px;display:flex;align-items:center;gap:22px;position:relative;border:2px solid var(--line);transition:transform .18s,box-shadow .18s,border-color .2s;cursor:pointer;transform:translateY(4px)}
-    .event-card:hover{box-shadow:0 16px 40px #0b1524cc;transform:translateY(0) scale(1.012);border-color:#3a4a62}
-    .event-card img{width:120px;height:120px;min-width:120px;border-radius:13px;object-fit:cover;background:#282f3b;box-shadow:0 2px 14px #1d2433;border:2px solid #384659}
-    .event-info-block{flex:1 1 0;display:flex;flex-direction:column;gap:6px}
-    .event-card strong{font-size:1.2rem;color:var(--brand);font-weight:800}
-    .event-card span{font-size:1.02rem;color:var(--sub)}
-    .fade-out{animation:fadeShrink .32s ease forwards}
-    @keyframes fadeShrink{to{opacity:0;transform:translateY(-6px);height:0;margin:0;padding-top:0;padding-bottom:0}}
+    .home-event-list,.favorite-event-list{display:flex;flex-direction:column;gap:16px;width:100%;align-items:center;margin:0;padding:0}
+    .event-card{
+      background:var(--panel-2);border-radius:16px;box-shadow:0 8px 28px #0b1524aa;
+      padding:14px 14px;width:100%;max-width:820px;display:flex;align-items:center;gap:14px;
+      position:relative;border:1.5px solid var(--line);transition:transform .18s,box-shadow .18s,border-color .2s;cursor:pointer;
+    }
+    .event-card:hover{box-shadow:0 16px 40px #0b1524cc;transform:translateY(-1px);border-color:#3a4a62}
+    .event-card img{width:110px;height:110px;min-width:110px;border-radius:12px;object-fit:cover;background:#282f3b;border:1.5px solid #384659}
+    .event-info-block{flex:1 1 0;display:flex;flex-direction:column;gap:4px}
+    .event-card strong{font-size:1.08rem;color:var(--brand);font-weight:800}
+    .event-card span{font-size:.98rem;color:var(--sub)}
 
-    /* 按鈕 */
-    .btn{font-family:inherit;font-size:.98rem;border:0;border-radius:10px;padding:9px 18px;font-weight:800;cursor:pointer;box-shadow:0 3px 12px #0003;transition:background .16s,color .12s,transform .12s,box-shadow .16s}
+    /* 統一按鈕 */
+    .btn{font-family:inherit;font-size:1rem;border:0;border-radius:12px;padding:12px 14px;font-weight:800;cursor:pointer;box-shadow:0 3px 12px #0003;transition:background .16s,color .12s,transform .12s,box-shadow .16s}
     .btn:active{transform:translateY(1px) scale(.99)}
     .btn-default{background:var(--accent-2);color:#fff}.btn-default:hover{background:#25a86a}
     .btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:#b34021}
     .btn-blue{background:var(--accent);color:#fff}.btn-blue:hover{background:#1975b5}
-    .btn-ghost{background:transparent;color:#b5d4fc;border:1px solid #334358}.btn-ghost:hover{color:#fff;border-color:#4a6a8c}
-    .btn-disabled,.btn[disabled]{background:#4e5765!important;color:#d2e6f5!important;cursor:not-allowed;box-shadow:none;opacity:.8}
+    .btn-ghost{background:transparent;color:#e8eef8;border:1px solid #334358}.btn-ghost:hover{color:#fff;border-color:#4a6a8c}
+    .btn-disabled,.btn[disabled]{background:#4e5765!important;color:#d2e6f5!important;cursor:not-allowed;box-shadow:none;opacity:.9}
 
     /* 輸入欄位 */
-    .form-grid{display:grid;gap:14px}
-    .input-dark{width:100%;background:var(--input);color:var(--ink);border:1.5px solid var(--input-line);border-radius:10px;padding:11px 12px;font-size:1rem;outline:none;transition:border-color .15s,box-shadow .15s,transform .12s}
+    .form-grid{display:grid;gap:12px}
+    .input-dark{width:100%;background:var(--input);color:var(--ink);border:1.5px solid var(--input-line);border-radius:12px;padding:14px 12px;font-size:1rem;outline:none;transition:border-color .15s,box-shadow .15s,transform .12s}
     .input-dark::placeholder{color:#8aa2c5;opacity:.9}
     .input-dark:focus{border-color:var(--input-focus);box-shadow:0 0 0 3px #3aa0ff33}
     textarea.input-dark{min-height:110px;resize:vertical}
 
-    /* 行事曆 */
-    .calendar-header-dark{display:flex;justify-content:center;align-items:center;gap:10px;background:var(--panel);padding:15px 0 10px;border-radius:14px 14px 0 0;box-shadow:var(--shadow-1);flex-wrap:wrap}
-    .calendar-outer-dark{background:var(--panel);border-radius:0 0 16px 16px;box-shadow:var(--shadow-2);padding:0 10px 18px;overflow-x:auto}
-    table.calendar-dark{width:100%;border-collapse:separate;border-spacing:0;min-width:700px;font-size:1.04rem}
-    table.calendar-dark thead th{padding:9px 0 7px;color:#b5d4fc;background:none;font-weight:800;border-bottom:1.5px solid #232f3c;letter-spacing:1.1px;text-align:center}
-    table.calendar-dark td{border:1.2px solid #232f3c;height:92px;width:13.5%;min-width:90px;vertical-align:top;background:#181c21;border-radius:12px;position:relative;color:#d2d2d7;padding:6px 7px 4px;transition:box-shadow .13s,background .18s}
+    /* 行事曆（框統一） */
+    .calendar-header-dark{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--panel);padding:10px 10px;border-radius:14px 14px 0 0;box-shadow:var(--shadow-1);flex-wrap:wrap}
+    .calendar-outer-dark{background:var(--panel);border:1.5px solid var(--line);border-top:0;border-radius:0 0 16px 16px;box-shadow:var(--shadow-2);padding:0 8px 12px;overflow-x:auto}
+    table.calendar-dark{width:100%;border-collapse:separate;border-spacing:0;min-width:680px;font-size:1rem}
+    table.calendar-dark thead th{padding:8px 0 6px;color:#eef5ff;background:none;font-weight:800;border-bottom:1.5px solid #232f3c;letter-spacing:.9px;text-align:center}
+    table.calendar-dark td{
+      border:1.5px solid #232f3c;height:88px;width:13.5%;min-width:90px;vertical-align:top;background:#181c21;
+      border-radius:12px;position:relative;color:#d2d2d7;padding:6px 7px 4px;transition:box-shadow .13s,background .18s
+    }
     table.calendar-dark td:hover{background:#23262a;box-shadow:0 0 6px #3da1ff20;z-index:2}
     .date-label-dark{display:flex;align-items:center;gap:6px;font-size:1rem}
-    .date-num-dark{color:#fff;font-weight:800;font-size:1.13rem;padding:1px 8px 1px 6px;border-radius:50%}
+    .date-num-dark{color:#fff;font-weight:800;font-size:1.04rem;padding:1px 8px 1px 6px;border-radius:50%}
     .date-today-dark{background:var(--accent)!important;color:#fff!important}
     .date-selected-dark{background:#3a4a62!important;color:#fff!important;box-shadow:0 0 0 2px #3a4a62aa inset;border-radius:10px;padding:1px 8px 1px 6px}
     .calendar-activity-col{display:flex;flex-direction:column;gap:4px;margin-top:6px}
-    .calendar-activity-item{background:#22b6ed;color:#fff;border-radius:8px;padding:4px 10px;font-size:.97rem;box-shadow:0 2px 7px #22b6ed33;white-space:nowrap;font-weight:700;display:inline-flex;align-items:center;gap:7px;transition:background .15s,transform .12s}
-    .calendar-activity-item:hover{background:#49caf7;color:#fffde7;transform:translateX(1px)}
-    .calendar-more-dot{margin-top:2px;color:#b5d4fc;font-size:1.25em;user-select:none;font-weight:800;letter-spacing:.12em}
+    .calendar-activity-item{background:#22b6ed;color:#fff;border-radius:8px;padding:4px 10px;font-size:.96rem;box-shadow:0 2px 7px #22b6ed33;white-space:nowrap;font-weight:700;display:inline-flex;align-items:center;gap:7px}
+    .calendar-more-dot{margin-top:2px;color:#e8eef8;font-size:1.25em;user-select:none;font-weight:800;letter-spacing:.12em}
     .tooltip{position:fixed;z-index:2000;background:#10151c;color:#dfefff;border:1px solid #334457;padding:8px 10px;border-radius:10px;font-size:.92rem;box-shadow:0 8px 24px #0008;pointer-events:none;opacity:0;transform:translateY(-4px);transition:opacity .12s,transform .12s;max-width:260px}
     .tooltip.show{opacity:1;transform:translateY(0)}
 
     /* Auth */
-    .auth-wrap{display:grid;gap:22px;grid-template-columns:repeat(2,minmax(260px,1fr))}
-    .auth-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow-2)}
-    .auth-title{margin:0 0 14px;color:#b5d4fc;font-weight:800;letter-spacing:.6px}
+    .auth-wrap{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(240px,1fr))}
+    .auth-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow-2)}
+    .auth-title{margin:0 0 10px;color:#eef5ff;font-weight:800;letter-spacing:.4px}
 
     /* Modal / Toast */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;justify-content:center;align-items:center;z-index:1000}
-    .modal{background:var(--panel);color:var(--ink);padding:20px;border-radius:13px;max-width:720px;width:94%;position:relative;box-shadow:0 8px 40px #1b2436b5;animation:fadeSlideIn .28s ease-out both;max-height:90vh;overflow:auto}
-    .promo-wrap{background:var(--img-bg);border-radius:12px;padding:10px;margin-bottom:12px;border:1px solid #2d3a49;box-shadow:inset 0 0 0 1px #00000020;max-height:70vh;overflow:auto}
+    .modal{background:var(--panel);color:var(--ink);padding:16px;border-radius:13px;max-width:720px;width:94%;position:relative;box-shadow:0 8px 40px #1b2436b5;animation:fadeSlideIn .28s ease-out both;max-height:90vh;overflow:auto}
+    .promo-wrap{background:var(--img-bg);border-radius:12px;padding:10px;margin-bottom:10px;border:1px solid #2d3a49;box-shadow:inset 0 0 0 1px #00000020;max-height:70vh;overflow:auto}
     .promo-img{width:100%;height:auto;max-height:70vh;object-fit:contain;display:block;margin:0 auto}
     .modal-close{position:absolute;top:10px;right:10px;font-size:20px;cursor:pointer;color:#a6bad8}
     .modal-close:hover{color:var(--brand)}
-    .confirm-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}
+    .confirm-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
     #previewImg{display:block;margin:8px 0;max-width:200px;max-height:130px;border-radius:10px;border:1.5px solid #2c4f75;object-fit:cover}
-    .toast{visibility:hidden;position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:10px 20px;border-radius:8px;font-size:16px;z-index:9999;opacity:0;transition:opacity .35s}
+    .toast{visibility:hidden;position:fixed;top:18px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:10px 16px;border-radius:8px;font-size:15px;z-index:9999;opacity:0;transition:opacity .35s}
     .toast.show{visibility:visible;opacity:1}
 
-    @media (max-width:960px){.auth-wrap{grid-template-columns:1fr}}
-    @media (max-width:540px){
-      .navbar{flex-direction:column;align-items:flex-start;height:auto;padding:10px 6vw;gap:5px}
-      nav{gap:12px;flex-wrap:wrap}
-      .page{padding:22px 4vw 0}
-      .event-card{flex-direction:column;align-items:flex-start;padding:16px}
+    /* 手機優化 */
+    @media (max-width:900px){
+      .navbar{padding:10px 12px;gap:12px}
+      .site-logo-img{height:52px} /* 手機上再放大一點，辨識度更好 */
+      nav{gap:10px}
+    }
+    @media (max-width:560px){
+      .page{padding:24px 4vw 0}
+      .home-section{padding:18px 14px;border-radius:16px}
+      .event-card{flex-direction:column;align-items:flex-start;padding:12px;border-radius:14px}
       .event-card img{width:100%;height:190px}
+      .btn{padding:12px 14px}
+      table.calendar-dark{min-width:640px} /* 減少橫向捲動距離 */
     }
 
     .contact-info a{color:var(--brand);text-decoration:underline}
   </style>
 
-  <!-- Firebase SDK（CDN compat 版） -->
+  <!-- Firebase SDK（CDN compat 版，適合單檔 HTML） -->
   <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
@@ -121,7 +187,8 @@
 <body>
   <header>
     <div class="navbar">
-      <span class="site-logo">KEVENTS</span>
+      <!-- ★ 換 Logo 圖片 -->
+      <img class="site-logo-img" src="logo draft.png" alt="KEVENTS Logo">
       <nav id="topNav">
         <a data-page="home" onclick="showPage('home', this)">首頁</a>
         <a data-page="calendar" onclick="showPage('calendar', this)">行事曆</a>
@@ -139,8 +206,8 @@
   <section id="home" class="page active">
     <div class="cover-photo-frame">
       <div class="cover-photo-box">
-        <!-- ★ 換首頁圖片在這裡 -->
-        <img id="coverPhoto" class="cover-photo" src="IMG_0441.jpeg" alt="Cover">
+        <!-- ★ 換首頁大圖路徑（滿版顯示、無灰邊） -->
+        <img id="coverPhoto" class="cover-photo" src="hero.jpg" alt="Cover">
       </div>
     </div>
 
@@ -155,7 +222,7 @@
     <div class="calendar-header-dark">
       <div style="display:flex;gap:8px;align-items:center;">
         <button onclick="changeMonth(-1)" class="btn btn-ghost" aria-label="上一月">‹</button>
-        <h2 id="calendarTitle" style="color:#fff;margin:0 6px;"></h2>
+        <h2 id="calendarTitle" style="color:#fff;margin:0 6px;font-size:1.05rem;"></h2>
         <button onclick="changeMonth(1)" class="btn btn-ghost" aria-label="下一月">›</button>
         <button id="btnToday" onclick="goToday()" class="btn btn-ghost" aria-label="回到今天">今天</button>
       </div>
@@ -174,7 +241,7 @@
 
   <!-- 聯絡我們 -->
   <section id="contact" class="page">
-    <div class="home-section" style="max-width:620px;margin:38px auto;">
+    <div class="home-section" style="max-width:620px;margin:18px auto;">
       <h3 class="section-title">聯絡我們</h3>
       <div class="auth-desc">有任何合作、上架活動或建議，歡迎來信：</div>
       <div class="contact-info"><a href="mailto:kevents.tw@gmail.com">kevents.tw@gmail.com</a></div>
@@ -190,7 +257,7 @@
           <input class="input-dark" type="text" id="username" placeholder="帳號">
           <input class="input-dark" type="password" id="password" placeholder="密碼">
         </div>
-        <div style="margin-top:12px;">
+        <div style="margin-top:10px;">
           <button class="btn btn-default" onclick="handleLogin()">登入</button>
         </div>
       </div>
@@ -201,7 +268,7 @@
           <input class="input-dark" type="text" id="newUsername" placeholder="新帳號">
           <input class="input-dark" type="password" id="newPassword" placeholder="新密碼">
         </div>
-        <div style="margin-top:12px;">
+        <div style="margin-top:10px;">
           <button class="btn btn-blue" onclick="handleRegister()">註冊</button>
         </div>
       </div>
@@ -229,7 +296,7 @@
         <label style="color:#b5d4fc;">宣傳照（可空白）：<input class="input-dark" style="padding:7px" type="file" id="eventImageFile" accept="image/*" onchange="previewImage(this)"></label>
         <img id="previewImg" style="display:none;">
       </div>
-      <div style="margin-top:12px;">
+      <div style="margin-top:10px;">
         <button class="btn btn-default" onclick="addEvent()">新增活動</button>
       </div>
     </div>
@@ -253,10 +320,10 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 先不要馬上讀 Firestore；等匿名登入完成
+    // 匿名登入（畫面不等待）
     firebase.auth().signInAnonymously().catch(console.error);
 
-    // 雲端 CRUD
+    // --- 雲端 CRUD 與同步 ---
     async function cloudLoadEvents() {
       const snap = await db.collection('events').get();
       return snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -266,9 +333,7 @@
       return ref.id;
     }
     async function cloudDeleteEvent(id) { await db.collection('events').doc(id).delete(); }
-    async function cloudUpsertUser(username, userObj) {
-      await db.collection('users').doc(username).set(userObj, { merge: true });
-    }
+    async function cloudUpsertUser(username, userObj) { await db.collection('users').doc(username).set(userObj, { merge: true }); }
     async function cloudLoadUsers() {
       const snap = await db.collection('users').get();
       const obj = {}; snap.forEach(d => obj[d.id] = d.data()); return obj;
@@ -286,7 +351,6 @@
       if (!username) return;
       await db.collection('favorites').doc(username).set({ items }, { merge: true });
     }
-    // 刪除活動時，同步從所有人的收藏移除
     async function cloudPurgeFavoritesForAll(deletedEvent) {
       try {
         const favSnap = await db.collection('favorites').get();
@@ -302,8 +366,6 @@
         await batch.commit();
       } catch (e) { console.warn('purge favorites failed', e); }
     }
-
-    // 即時訂閱（events）
     function subscribeEventsRealtime(){
       return db.collection('events').onSnapshot(snap=>{
         events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -311,8 +373,7 @@
         renderCalendarByMode(); updateHomeEvents(); if (currentUser) renderFavorites();
       }, err => console.warn('events onSnapshot error', err));
     }
-    let favUnsub = null; // 即時訂閱（個人收藏）
-
+    let favUnsub = null;
     async function cloudLoadAll() {
       try {
         const [ev, us] = await Promise.all([cloudLoadEvents(), cloudLoadUsers()]);
@@ -336,7 +397,7 @@
     let selectedDate = new Date();
     let selectedDayInMonth = null;
 
-    /* 讓 Tony 成為管理者（若不存在就建立；若存在則校正） */
+    /* Tony 管理者保底 */
     async function seedAdminTony() {
       try {
         users = JSON.parse(localStorage.getItem('users')) || users || {};
@@ -345,12 +406,10 @@
           localStorage.setItem('users', JSON.stringify(users));
         }
         await cloudUpsertUser('Tony', { password: '961002', isAdmin: true });
-      } catch (e) {
-        console.warn('seedAdminTony failed', e);
-      }
+      } catch (e) { console.warn('seedAdminTony failed', e); }
     }
 
-    /* Navbar 動畫 */
+    /* Navbar 底線動畫 */
     function moveUnderline(el){
       const nav = document.getElementById('topNav');
       const u = document.getElementById('navUnderline');
@@ -372,7 +431,7 @@
       else { img.src=''; img.style.display='none'; uploadedImageBase64=''; }
     }
 
-    /* 註冊 / 登入 / 登出 + 管理者保底 */
+    /* Auth */
     async function handleRegister(){
       const username = document.getElementById('newUsername').value.trim();
       const password = document.getElementById('newPassword').value;
@@ -402,11 +461,8 @@
     async function handleLogin(){
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
-
-      // 先看本地
       let user = users[username];
 
-      // ★ 若本地沒有（或還沒同步），改去雲端抓一次（避免手機第一次載入時登入失敗）
       if (!user) {
         try {
           const cloudUser = await cloudLoadUserOnce(username);
@@ -415,9 +471,7 @@
             localStorage.setItem('users', JSON.stringify(users));
             user = cloudUser;
           }
-        } catch (e) {
-          console.warn('load user on login failed', e);
-        }
+        } catch (e) { console.warn('load user on login failed', e); }
       }
 
       if (!user || user.password !== password) return showToast('帳號或密碼錯誤');
@@ -430,7 +484,6 @@
       showPage('home', document.querySelector('nav a[data-page="home"]'));
       showToast('登入成功');
 
-      // 讀取雲端收藏（並即時訂閱）
       try{
         const items = await cloudLoadFavorites(currentUser);
         favorites[currentUser] = items; localStorage.setItem('favorites', JSON.stringify(favorites));
@@ -477,9 +530,44 @@
       document.getElementById('confirmYes').onclick = ()=> { closeModal(); try{ onYes && onYes(); }catch(_){} };
     }
 
-    /* 活動：新增/刪除（含雲端、收藏同步） */
+    /* ========= 刪除：以 ID 為準，避免索引錯位 ========= */
+    function requestDeleteEventById(id, composite){
+      if (!currentUser || !users[currentUser]?.isAdmin) return showToast('僅限管理員刪除活動');
+      showConfirm('確定要刪除這個活動嗎？', ()=> doDeleteEventById(id, composite));
+    }
+    async function doDeleteEventById(id, composite){
+      let idx = (id) ? events.findIndex(e => e.id === id) : -1;
+      if (idx === -1 && composite){
+        idx = events.findIndex(e =>
+          e.name === composite.name &&
+          e.time === composite.time &&
+          e.org === composite.org &&
+          e.location === composite.location
+        );
+      }
+      if (idx === -1) { showToast('找不到要刪除的活動'); return; }
+
+      const deleted = events[idx];
+      try{ if (deleted.id) await cloudDeleteEvent(deleted.id); }catch(e){ console.warn('Cloud delete failed', e); }
+      events.splice(idx,1);
+      localStorage.setItem('events', JSON.stringify(events));
+
+      await cloudPurgeFavoritesForAll(deleted);
+      Object.keys(favorites).forEach(u => {
+        favorites[u] = (favorites[u]||[]).filter(e => !(e.name===deleted.name && e.time===deleted.time && e.org===deleted.org && e.location===deleted.location));
+      });
+      localStorage.setItem('favorites', JSON.stringify(favorites));
+      if (currentUser) cloudSaveFavorites(currentUser, favorites[currentUser]||[]).catch(console.error);
+
+      renderFavorites(); renderCalendarByMode(); updateHomeEvents(); closeModal(); showToast('已刪除活動');
+    }
+    function requestDeleteEvent(idx){
+      const obj = events[idx]; requestDeleteEventById(obj?.id, obj);
+    }
+
+    /* 活動新增 */
     async function addEvent(){
-      if (!currentUser || !users[currentUser].isAdmin) return showToast('僅限管理員新增活動');
+      if (!currentUser || !users[currentUser]?.isAdmin) return showToast('僅限管理員新增活動');
       const e = {
         name: document.getElementById('eventName').value.trim() || '',
         org:  document.getElementById('eventOrg').value.trim() || '',
@@ -498,26 +586,7 @@
       renderCalendarByMode(); updateHomeEvents(); showToast('活動新增成功');
     }
 
-    function requestDeleteEvent(idx){
-      if (!currentUser || !users[currentUser].isAdmin) return showToast('僅限管理員刪除活動');
-      showConfirm('確定要刪除這個活動嗎？', ()=> doDeleteEvent(idx));
-    }
-
-    async function doDeleteEvent(idx){
-      const deleted = events[idx];
-      try{ if (deleted.id) await cloudDeleteEvent(deleted.id); }catch(e){ console.warn('Cloud delete failed', e); }
-      events.splice(idx,1); localStorage.setItem('events', JSON.stringify(events));
-      await cloudPurgeFavoritesForAll(deleted);
-      Object.keys(favorites).forEach(u => {
-        favorites[u] = (favorites[u]||[]).filter(e => !(e.name===deleted.name && e.time===deleted.time && e.org===deleted.org && e.location===deleted.location));
-      });
-      localStorage.setItem('favorites', JSON.stringify(favorites));
-      if (currentUser) cloudSaveFavorites(currentUser, favorites[currentUser]||[]).catch(console.error);
-
-      renderFavorites(); renderCalendarByMode(); updateHomeEvents(); closeModal(); showToast('已刪除活動');
-    }
-
-    /* 行事曆：三種模式 */
+    /* 行事曆三模式 */
     function setCalendarMode(mode){
       calendarMode = mode;
       ['modeMonth','modeWeek','modeList'].forEach(id=>{ document.getElementById(id).classList.remove('btn-blue'); document.getElementById(id).classList.add('btn-ghost');});
@@ -614,13 +683,13 @@
 
     function renderCalendarList(){
       const container=document.getElementById('calendarContainer'); const title=document.getElementById('calendarTitle');
-      title.textContent=`活動清單（未來活動）`;
       const now=new Date(); const todayString=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+      title.textContent=`活動清單（未來活動）`;
       const items=[...events].map((e,idx)=>({...e,_idx:idx})).filter(e=>e.time && e.time.substr(0,10)>=todayString).sort((a,b)=>a.time.localeCompare(b.time));
 
       container.innerHTML = `
-        <div style="padding:14px 10px;">
-          ${items.length? '' : '<div style="opacity:.7;">目前沒有未來活動</div>'}
+        <div style="padding:12px 8px;">
+          ${items.length? '' : '<div style="opacity:.75;">目前沒有未來活動</div>'}
           ${items.map(evt=>`
             <div class="event-card" style="max-width:100%;cursor:default;">
               ${evt.image? `<img src="${evt.image}" alt="宣傳照">` : ''}
@@ -631,7 +700,7 @@
               </div>
               <div style="display:flex;gap:8px;">
                 <button class="btn btn-default" onclick="showEventDetail(events[${evt._idx}], ${evt._idx})">詳細</button>
-                ${(currentUser && users[currentUser]?.isAdmin)? `<button class="btn btn-danger" onclick="requestDeleteEvent(${evt._idx})">刪除</button>`: ''}
+                ${(currentUser && users[currentUser]?.isAdmin)? `<button class="btn btn-danger" onclick="requestDeleteEventById('${evt.id||''}', events[${evt._idx}] || null)">刪除</button>`: ''}
               </div>
             </div>
           `).join('')}
@@ -673,37 +742,48 @@
       const overlay=document.querySelector('.modal-overlay'); overlay.onclick=(e)=>{ if(e.target===overlay) closeModal(); };
     }
 
-    /* 首頁近期活動（可收藏） */
+    /* 首頁近期活動：若不足 3 筆，以「無日期」活動補位；無圖不顯示圖片框 */
     function updateHomeEvents(){
       const list=document.getElementById('homeEvents'); list.innerHTML='';
       const now=new Date(); const todayString=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-      const sorted=[...events].map((evt,idx)=>({...evt,_idx:idx})).filter(evt=>evt.time && evt.time.substr(0,10)>=todayString).sort((a,b)=>a.time.localeCompare(b.time)).slice(0,3);
-      sorted.forEach(evt=>{
-        const card=document.createElement('div'); card.className='event-card'; card.onclick=()=> showEventDetail(events[evt._idx], evt._idx);
-        if(evt.image){ const img=document.createElement('img'); img.src=evt.image; img.alt='活動宣傳照'; card.appendChild(img); }
+
+      const upcoming=[...events].map((evt,idx)=>({...evt,_idx:idx}))
+        .filter(evt=>evt.time && evt.time.substr(0,10)>=todayString)
+        .sort((a,b)=>a.time.localeCompare(b.time));
+
+      const undated=[...events].map((evt,idx)=>({...evt,_idx:idx}))
+        .filter(evt=>!evt.time || evt.time.trim()==='');
+
+      const pick=[...upcoming, ...undated].slice(0,3);
+
+      pick.forEach(evt=>{
+        const card=document.createElement('div'); card.className='event-card'; card.onclick=()=> showEventDetail(events[evt._idx] || evt, evt._idx ?? -1);
+        if(evt.image && evt.image.trim()!==''){  /* ★ 無圖就不放圖片框 */
+          const img=document.createElement('img'); img.src=evt.image; img.alt='活動宣傳照'; card.appendChild(img);
+        }
         const info=document.createElement('div'); info.className='event-info-block';
-        info.innerHTML=`<strong>${evt.name||'未命名活動'}</strong><span>主辦單位：${evt.org||''}</span><span>時間：${evt.time?evt.time.replace('T',' '):''}</span>`;
+        info.innerHTML=`<strong>${evt.name||'未命名活動'}</strong><span>主辦單位：${evt.org||''}</span><span>時間：${evt.time?evt.time.replace('T',' '):'日期未定'}</span>`;
         card.appendChild(info);
         if(currentUser){
           const isFaved=(favorites[currentUser]||[]).some(e=>e.name===evt.name && e.time===evt.time && e.org===evt.org && e.location===evt.location);
           const favBtn=document.createElement('button'); favBtn.className='btn btn-blue'+(isFaved?' btn-disabled':''); favBtn.textContent=isFaved?'已收藏':'收藏'; favBtn.disabled=isFaved;
-          favBtn.onclick=(e)=>{ e.stopPropagation(); if(!isFaved){ addFavorite(events[evt._idx]); } };
+          favBtn.onclick=(e)=>{ e.stopPropagation(); if(!isFaved){ addFavorite(events[evt._idx] || evt); } };
           card.appendChild(favBtn);
         }
         if(currentUser && users[currentUser]?.isAdmin){
           const del=document.createElement('button'); del.className='btn btn-danger'; del.textContent='刪除';
-          del.onclick=(e)=>{ e.stopPropagation(); requestDeleteEvent(evt._idx); };
+          del.onclick=(e)=>{ e.stopPropagation(); requestDeleteEventById(evt.id || (events[evt._idx]?.id), events[evt._idx] || evt); };
           card.appendChild(del);
         }
         list.appendChild(card);
       });
     }
 
-    /* 詳細彈窗（完整顯示宣傳照） */
+    /* 詳細彈窗（完整顯示宣傳照；刪除改走 ID） */
     function showEventDetail(evt, idx){
       const container=document.getElementById('modalContainer');
       let isFaved=false; if(currentUser){ isFaved=(favorites[currentUser]||[]).some(e=>e.name===evt.name && e.time===evt.time && e.org===evt.org && e.location===evt.location); }
-      const imgBlock = evt.image ? `<div class="promo-wrap"><img class="promo-img" src="${evt.image}" alt="宣傳照"></div>` : '';
+      const imgBlock = (evt.image && evt.image.trim()!=='') ? `<div class="promo-wrap"><img class="promo-img" src="${evt.image}" alt="宣傳照"></div>` : '';
       container.innerHTML=`
         <div class="modal-overlay">
           <div class="modal" onclick="event.stopPropagation()">
@@ -711,18 +791,22 @@
             ${imgBlock}
             <h3 style="margin:.2rem 0 .2rem;">${evt.name||'未命名活動'}</h3>
             <p>主辦單位：${evt.org||''}</p>
-            <p>時間：${evt.time?evt.time.replace('T',' '):''}</p>
+            <p>時間：${evt.time?evt.time.replace('T',' '):'日期未定'}</p>
             <p>地點：${evt.location||''}</p>
             <p>票價：${evt.price||''}</p>
             ${evt.desc? `<p>簡介：${evt.desc}</p>`:''}
             ${evt.social? `<p><a href="${evt.social}" target="_blank" style="color:#6ec6ff;">社群連結</a></p>`:''}
             ${currentUser? `<button id="favInDetail" class="btn btn-blue${isFaved?' btn-disabled':''}" ${isFaved?'disabled':''}>${isFaved?'已收藏':'收藏'}</button>`:''}
-            ${(currentUser && users[currentUser]?.isAdmin)? `<button class="btn btn-danger" style="margin-left:10px;" onclick="requestDeleteEvent(${idx})">刪除活動</button>`:''}
+            ${(currentUser && users[currentUser]?.isAdmin)? `<button id="delEventBtn" class="btn btn-danger" style="margin-left:10px;">刪除活動</button>`:''}
           </div>
         </div>`;
       if(currentUser){
         const favBtn=document.getElementById('favInDetail');
-        if(favBtn && !isFaved){ favBtn.onclick=(e)=>{ e.stopPropagation(); addFavorite(events[idx]); favBtn.classList.add('btn-disabled'); favBtn.disabled=true; favBtn.textContent='已收藏'; }; }
+        if(favBtn && !isFaved){ favBtn.onclick=(e)=>{ e.stopPropagation(); addFavorite(evt); favBtn.classList.add('btn-disabled'); favBtn.disabled=true; favBtn.textContent='已收藏'; }; }
+      }
+      if (currentUser && users[currentUser]?.isAdmin) {
+        const delBtn = document.getElementById('delEventBtn');
+        if (delBtn) delBtn.onclick = (e)=>{ e.stopPropagation(); requestDeleteEventById(evt.id, evt); };
       }
       const overlay=document.querySelector('.modal-overlay'); overlay.onclick=(e)=>{ if(e.target===overlay) closeModal(); };
     }
@@ -744,13 +828,13 @@
       const favs=favorites[currentUser]||[]; if(favs.length===0){ list.innerHTML='<div style="opacity:.7;">目前沒有收藏任何活動</div>'; return; }
       favs.forEach((evt,i)=>{
         const card=document.createElement('div'); card.className='event-card'; card.onclick=()=> showEventDetail(evt, getEventIdx(evt));
-        if(evt.image){ const img=document.createElement('img'); img.src=evt.image; img.alt='活動宣傳照'; card.appendChild(img); }
+        if(evt.image && evt.image.trim()!==''){ const img=document.createElement('img'); img.src=evt.image; img.alt='活動宣傳照'; card.appendChild(img); }
         const info=document.createElement('div'); info.className='event-info-block';
-        info.innerHTML=`<strong>${evt.name||'未命名活動'}</strong><span>主辦單位：${evt.org||''}</span><span>時間：${evt.time?evt.time.replace('T',' '):''}</span>`;
+        info.innerHTML=`<strong>${evt.name||'未命名活動'}</strong><span>主辦單位：${evt.org||''}</span><span>時間：${evt.time?evt.time.replace('T',' '):'日期未定'}</span>`;
         card.appendChild(info);
         const unBtn=document.createElement('button'); unBtn.className='btn btn-danger'; unBtn.textContent='取消收藏';
-        unBtn.style.position='absolute'; unBtn.style.bottom='18px'; unBtn.style.right='18px';
-        unBtn.onclick=(e)=>{ e.stopPropagation(); card.classList.add('fade-out'); setTimeout(()=> removeFavorite(i), 320); };
+        unBtn.style.position='absolute'; unBtn.style.bottom='12px'; unBtn.style.right='12px';
+        unBtn.onclick=(e)=>{ e.stopPropagation(); card.classList.add('fade-out'); setTimeout(()=> removeFavorite(i), 260); };
         card.appendChild(unBtn); list.appendChild(card);
       });
     }
@@ -761,7 +845,7 @@
       renderFavorites(); updateHomeEvents(); showToast('已取消收藏');
     }
 
-    /* Page / Toast （★ 非管理者禁止進入新增活動） */
+    /* Page / Toast */
     function showPage(id, navEl=null){
       if (id === 'addEvent') {
         if (!currentUser || !users[currentUser] || users[currentUser].isAdmin !== true) {
@@ -776,25 +860,38 @@
       if(!navEl) navEl=document.querySelector(`nav a[data-page="${id}"]`);
       moveUnderline(navEl);
     }
-    function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2800); }
+    function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2400); }
 
-    /* ========= 關鍵修正：等匿名登入完成再啟動 App ========= */
-    window.addEventListener('load', async ()=>{
-      firebase.auth().onAuthStateChanged(async (user) => {
-        if (!user) return;               // 還沒登入好，先別動
-        try{
-          await seedAdminTony();         // ★ 確保 Tony/961002 為管理者（雲端＋本地）
-          await cloudLoadAll();          // ★ 拉遠端 users/events 到本地
-          renderCalendarByMode(); updateHomeEvents();
-          moveUnderline(document.querySelector('nav a[data-page="home"]'));
-          setCalendarMode('month');
+    /* 初始化 */
+    window.addEventListener('load', async () => {
+      try {
+        renderCalendarByMode();
+        updateHomeEvents();
+        moveUnderline(document.querySelector('nav a[data-page="home"]'));
+        setCalendarMode('month');
+      } catch (_) {}
 
-          // ★ 匿名登入完成後才開始訂閱（確保手機端也能成功）
-          const unSubEvents = subscribeEventsRealtime();
-          window.addEventListener('beforeunload', ()=>{ try{unSubEvents&&unSubEvents();}catch(_){ } });
-        }catch(e){
-          console.warn('init after auth failed', e);
+      try {
+        const ev = await cloudLoadEvents();
+        if (Array.isArray(ev)) {
+          events = ev;
+          localStorage.setItem('events', JSON.stringify(events));
+          renderCalendarByMode();
+          updateHomeEvents();
         }
+      } catch (e) { console.warn('Public fetch events failed', e); }
+
+      firebase.auth().onAuthStateChanged(async (user) => {
+        if (!user) return;
+        try{
+          await seedAdminTony();
+          await cloudLoadAll();
+          renderCalendarByMode();
+          updateHomeEvents();
+
+          const unSubEvents = subscribeEventsRealtime();
+          window.addEventListener('beforeunload', () => { try { unSubEvents && unSubEvents(); } catch (_) {} });
+        }catch(e){ console.warn('init after auth failed', e); }
       });
     });
   </script>
