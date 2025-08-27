@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KEVENTS 高雄學生社團活動行事曆</title>
+
+  <style>
+    :root{
+      --bg-deep:#0b0b0b; --bg:#111; --panel:#181818; --panel-2:#1e1f22;
+      --ink:#f2f6ff; --sub:#cfe2ff; --brand:#6ec6ff; --line:#2a3545;
+      --accent:#2599ff; --accent-2:#2ec67d; --danger:#e17055;
+      --input:#1e232b; --input-line:#2e3a4a; --input-focus:#3aa0ff;
+      --shadow-1: 0 2px 8px #0006; --shadow-2: 0 8px 32px #0005; --shadow-3: 0 18px 70px #0008;
+      --img-bg:#0f1319;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+
+    /* Base */
+    body{
+      background:
+        radial-gradient(120% 120% at 80% -10%, #191919 0%, #101010 60%, #0b0b0b 100%),
+        radial-gradient(120% 120% at 20% -10%, #191919 0%, #101010 60%, #0b0b0b 100%),
+        linear-gradient(180deg, #0b0b0b 0%, #0f0f0f 100%);
+      color:var(--ink);min-height:100vh;
+    }
+
+    /* Navbar：純黑＋可水平滑動（手機） */
+    header{
+      background:#000;color:#fff;box-shadow:var(--shadow-1);
+      position:sticky;top:0;z-index:10;border-bottom:1px solid #151515;
+    }
+    .navbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;gap:16px}
+    .site-logo-img{height:58px;width:auto;display:block;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.35))}
+    nav{
+      position:relative;display:flex;align-items:center;gap:14px;
+      overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;padding:2px 4px 6px;margin-left:auto
+    }
+    nav a{color:#fff;text-decoration:none;font-weight:800;opacity:.88;padding:6px 8px;border-radius:8px}
+    nav a:hover{background:#101010}
+
+    .btn{appearance:none;border:none;border-radius:10px;padding:8px 12px;color:#fff;background:#21262e;cursor:pointer}
+    .btn:hover{background:#2a3545}
+    .btn-ghost{background:transparent;border:1px solid #232323}
+    .btn-ghost:hover{background:#121212}
+
+    /* Home */
+    .page{display:none;padding:16px}
+    .page.active{display:block}
+
+    .cover-photo-frame{border-radius:18px;overflow:hidden;background:#000}
+    .cover-photo-box{position:relative;width:100%;padding-top:38%}
+    .cover-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+
+    .home-section{margin-top:18px}
+    .section-title{margin:0 0 10px;font-size:1.1rem;color:#e7f1ff;letter-spacing:.6px}
+    .home-event-list{display:grid;grid-template-columns:1fr;gap:12px}
+    .home-event-card{background:#0f0f0f;border:1px solid #191919;border-radius:16px;padding:12px;box-shadow:var(--shadow-2)}
+
+    /* Calendar */
+    .calendar-header-dark{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#0f0f0f;padding:10px 10px;border:1px solid #1d1d1d;border-radius:14px 14px 0 0;box-shadow:var(--shadow-1);flex-wrap:wrap}
+    .calendar-outer-dark{background:#0f0f0f;border:1px solid #1d1d1d;border-top:none;border-radius:0 0 14px 14px;box-shadow:var(--shadow-2);padding:0 8px 10px}
+    table.calendar-dark{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:1rem}
+    table.calendar-dark thead th{padding:8px 0 6px;color:#eef5ff;opacity:.9;border-bottom:1px solid #1f2630;letter-spacing:.9px;text-align:center}
+    table.calendar-dark td{
+      border:1px solid #1f2630;height:86px;vertical-align:top;background:#121212;
+      border-radius:12px;position:relative;color:#d2d2d7;padding:6px 6px 4px;transition:box-shadow .13s,background .18s
+    }
+    table.calendar-dark td:hover{background:#181818;box-shadow:0 0 6px #3da1ff20;z-index:2}
+    .date-label-dark{display:flex;align-items:center;gap:6px;font-size:1rem}
+    .date-num-dark{color:#fff;font-weight:800;font-size:1.02rem;padding:1px 8px 1px 6px;border-radius:50%}
+    .date-today-dark{background:var(--accent)!important;color:#fff!important}
+    .date-selected-dark{background:#3a4a62!important;color:#fff!important;box-shadow:0 0 0 2px #3a4a62aa inset;border-radius:10px;padding:1px 8px 1px 6px}
+    .calendar-activity-col{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+    .calendar-activity-item{background:#22b6ed;color:#fff;border-radius:8px;padding:3px 8px;font-size:.92rem;box-shadow:0 2px 7px #22b6ed33;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-flex;align-items:center;gap:6px}
+    .calendar-more-dot{margin-top:2px;color:#e8eef8;font-size:1.15em;user-select:none;font-weight:800;letter-spacing:.12em}
+    .tooltip{position:fixed;z-index:2000;background:#10151c;color:#eef2ff;border:1px solid #1e2733;border-radius:12px;padding:10px 12px;font-size:.96rem;opacity:0;transform:translateY(-4px);transition:opacity .12s,transform .12s;max-width:260px}
+    .tooltip.show{opacity:1;transform:translateY(0)}
+
+    /* Auth：行動優先上下排列 */
+    .auth-wrap{display:grid;gap:14px;grid-template-columns:1fr}
+    .auth-card{background:#111;border:1px solid #1c1c1c;border-radius:16px;padding:16px;box-shadow:var(--shadow-2)}
+    .auth-title{margin:0 0 10px;color:#eef5ff;font-weight:800;letter-spacing:.4px}
+
+    /* Modal / Toast */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.66);backdrop-filter:blur(6px);display:none;justify-content:center;align-items:center;z-index:1000}
+    .modal{background:#111;color:var(--ink);padding:16px;border:1px solid #232323;border-radius:16px;max-width:720px;width:94%;position:relative;box-shadow:0 8px 40px #000;animation:zoomIn .12s ease}
+    .modal-close{position:absolute;right:10px;top:10px;background:#1c1c1c;border:1px solid #2c2c2c;border-radius:8px;color:#fff;padding:6px 8px;cursor:pointer}
+    .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#111;border:1px solid #2a2a2a;border-radius:12px;color:#fff;padding:10px 12px;display:none;z-index:1200}
+
+    @keyframes zoomIn{from{transform:scale(.96);opacity:.2}to{transform:scale(1);opacity:1}}
+
+    /* RWD 細節 */
+    @media (min-width: 720px){
+      .home-event-list{grid-template-columns:repeat(3,1fr)}
+    }
+    @media (max-width: 480px){
+      .date-label-dark{font-size:.96rem}
+      .calendar-activity-item{font-size:.9rem}
+    }
+
+    /* 輸入控制 */
+    input,select,textarea{background:#0f1116;border:1px solid #1d2633;color:#eaf0ff;border-radius:10px;padding:10px 12px;outline:none}
+    input:focus,select:focus,textarea:focus{border-color:var(--input-focus);box-shadow:0 0 0 2px #3aa0ff33}
+    label{color:#eaf0ff;opacity:.9}
+
+    /* 行事曆：手機不需橫向滑動（table-layout:fixed + 移除 min-*/
+  </style>
+
+  <!-- ✅ 0827 Calendar 專用覆蓋修正：活動膠囊同尺寸、日期對齊星期、每週白線分隔 -->
+  <style id="calendar-fix-0827">
+    /* 固定欄寬、置中：日期會正對上方的星期 */
+    #calendar table.calendar-dark{
+      table-layout: fixed !important;
+      width: 100% !important;
+      border-spacing: 0 !important;
+    }
+    #calendar table.calendar-dark thead th,
+    #calendar table.calendar-dark td{
+      text-align: center !important;
+      vertical-align: top !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+    /* 日期這一行置中顯示，就會和星期抬頭對齊 */
+    #calendar .date-label-dark{
+      display: flex !important;
+      justify-content: center !important;
+      align-items: flex-start !important;
+    }
+    #calendar .date-num-dark{
+      display: inline-block !important;
+      margin-top: 4px !important;
+    }
+
+    /* 活動膠囊：每顆都同尺寸、置中，名稱過長省略 */
+    #calendar .calendar-activity-col{
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      gap: 6px !important;
+    }
+    #calendar .calendar-activity-item{
+      width: 72% !important;          /* 統一寬度 */
+      height: 26px !important;         /* 統一高度 */
+      line-height: 26px !important;    /* 文字垂直置中 */
+      padding: 0 10px !important;
+      border-radius: 9999px !important;
+      display: inline-flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+    /* 每格最多顯示 2 個活動膠囊（第三個之後隱藏）*/
+    #calendar .calendar-activity-col .calendar-activity-item:nth-child(n+3){
+      display: none !important;
+    }
+
+    /* 每週底部畫一條白色分隔線（僅畫在列底部） */
+    #calendar table.calendar-dark tbody tr{ position: relative; }
+    #calendar table.calendar-dark tbody tr:not(:last-child)::after{
+      content: "";
+      position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+      background: #ffffff;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="navbar">
+      <img src="logo_kevents_blueK_white_text.png" alt="KEVENTS" class="site-logo-img" />
+      <nav>
+        <a href="#" onclick="event.preventDefault(); showPage('home')">首頁</a>
+        <a href="#" onclick="event.preventDefault(); showPage('calendar')">行事曆</a>
+        <a href="#" onclick="event.preventDefault(); showPage('auth')">登入 / 註冊</a>
+        <a href="#" onclick="event.preventDefault(); showPage('personal')">個人頁</a>
+        <a href="#" onclick="event.preventDefault(); showPage('admin')">新增活動</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 首頁 -->
+  <section id="home" class="page active">
+    <div class="cover-photo-frame">
+      <div class="cover-photo-box">
+        <!-- ★ 首頁大圖：改為你指定的 IMG_0441.jpeg（滿版） -->
+        <img id="coverPhoto" class="cover-photo" src="IMG_0441.jpeg" alt="Cover">
+      </div>
+    </div>
+
+    <div class="home-section">
+      <h3 class="section-title">近期活動</h3>
+      <div id="homeEvents" class="home-event-list"></div>
+    </div>
+  </section>
+
+  <!-- 行事曆 -->
+  <section id="calendar" class="page">
+    <div class="calendar-header-dark">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button onclick="changeMonth(-1)" class="btn btn-ghost" aria-label="上一月">‹</button>
+        <h2 id="calendarTitle" style="color:#fff;margin:0 6px;font-size:1.02rem;"></h2>
+        <button onclick="changeMonth(1)" class="btn btn-ghost" aria-label="下一月">›</button>
+        <button id="btnToday" onclick="goToday()" class="btn btn-ghost" aria-label="回到今天">今天</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <label style="display:flex;align-items:center;gap:6px">
+          <span>搜尋：</span>
+          <input id="calendarSearch" type="text" placeholder="輸入關鍵字…" />
+        </label>
+      </div>
+    </div>
+
+    <div class="calendar-outer-dark">
+      <table class="calendar-dark">
+        <thead>
+          <tr>
+            <th>日</th><th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th>六</th>
+          </tr>
+        </thead>
+        <tbody id="calendarBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 登入/註冊 -->
+  <section id="auth" class="page">
+    <div class="auth-wrap">
+      <div class="auth-card">
+        <h3 class="auth-title">登入</h3>
+        <label>帳號（Email）<br /><input id="loginEmail" type="email" /></label><br /><br />
+        <label>密碼<br /><input id="loginPassword" type="password" /></label><br /><br />
+        <button class="btn" onclick="handleLogin()">登入</button>
+      </div>
+      <div class="auth-card">
+        <h3 class="auth-title">註冊</h3>
+        <label>帳號（Email）<br /><input id="registerEmail" type="email" /></label><br /><br />
+        <label>密碼<br /><input id="registerPassword" type="password" /></label><br /><br />
+        <label>類型<br />
+          <select id="registerType">
+            <option value="personal">個人</option>
+            <option value="club">社團</option>
+          </select>
+        </label><br /><br />
+        <button class="btn" onclick="handleRegister()">註冊</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 個人頁 -->
+  <section id="personal" class="page">
+    <h3 class="section-title">我的收藏</h3>
+    <div id="favoriteList"></div>
+  </section>
+
+  <!-- Admin：新增活動 -->
+  <section id="admin" class="page">
+    <h3 class="section-title">管理者新增活動</h3>
+    <p>帳號：Tony　密碼：961002</p>
+    <div class="auth-card">
+      <label>活動名稱<br /><input id="newTitle" /></label><br /><br />
+      <label>日期（YYYY-MM-DD）<br /><input id="newDate" placeholder="2025-09-01" /></label><br /><br />
+      <label>主辦單位<br /><input id="newHost" /></label><br /><br />
+      <label>地點<br /><input id="newPlace" /></label><br /><br />
+      <label>票價<br /><input id="newPrice" /></label><br /><br />
+      <label>宣傳照<br /><input id="newImg" type="file" accept="image/*" /></label><br /><br />
+      <button class="btn" onclick="handleAddEvent()">新增活動</button>
+    </div>
+  </section>
+
+  <!-- Modal / Toast -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal()">關閉</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // ———— Router ————
+    function showPage(id){
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
+      document.getElementById(id).classList.add('active')
+    }
+
+    // ———— 假資料 ————
+    const events = [
+      { id: 1, title: '街舞社成發', date: '2025-08-28', host: 'XX高中街舞社', place: '表演廳', price: 'Free', img: '' },
+      { id: 2, title: '動漫社攤位', date: '2025-08-28', host: 'OO高中動漫社', place: '中庭', price: '$50', img: '' },
+      { id: 3, title: '合唱團迎新', date: '2025-08-29', host: '合唱團', place: '音樂教室', price: 'Free', img: '' },
+      { id: 4, title: '英文演講比賽', date: '2025-09-02', host: '英語研究社', place: '大禮堂', price: '$100', img: '' },
+      { id: 5, title: '籃球三對三', date: '2025-09-05', host: '籃球校隊', place: '體育館', price: '$80', img: '' }
+    ];
+
+    // ———— 首頁近期活動（最近 3 筆） ————
+    function renderHome(){
+      const list = [...events].sort((a,b)=>a.date.localeCompare(b.date))
+      const today = new Date().toISOString().slice(0,10)
+      const upcoming = list.filter(e=>e.date >= today).slice(0,3)
+      const el = document.getElementById('homeEvents')
+      el.innerHTML = upcoming.map(e=>`
+        <div class="home-event-card">
+          <strong>${e.title}</strong><br />
+          <span style="opacity:.8">${e.date}｜${e.place}</span>
+        </div>
+      `).join('')
+    }
+
+    // ———— 行事曆 ————
+    let current = new Date()
+    current.setDate(1)
+
+    function buildCalendar(date){
+      const y = date.getFullYear()
+      const m = date.getMonth()
+      const first = new Date(y, m, 1)
+      const startDay = first.getDay()
+      const days = new Date(y, m+1, 0).getDate()
+
+      const tbody = document.getElementById('calendarBody')
+      tbody.innerHTML = ''
+
+      let d = 1
+      for(let r=0; r<6; r++){
+        const tr = document.createElement('tr')
+        for(let c=0; c<7; c++){
+          const td = document.createElement('td')
+          const idx = r*7 + c
+          if(idx >= startDay && d <= days){
+            const dayStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+            const label = document.createElement('div')
+            label.className = 'date-label-dark'
+            const num = document.createElement('span')
+            num.className = 'date-num-dark'
+            num.textContent = d
+            if (new Date().toDateString() === new Date(y, m, d).toDateString()) num.classList.add('date-today-dark')
+            label.appendChild(num)
+            td.appendChild(label)
+
+            const col = document.createElement('div')
+            col.className = 'calendar-activity-col'
+            const daily = events.filter(e=>e.date === dayStr)
+            daily.slice(0,3).forEach(e=>{
+              const chip = document.createElement('div')
+              chip.className = 'calendar-activity-item'
+              chip.textContent = e.title
+              chip.title = e.title
+              chip.onclick = ()=> openModal(e)
+              col.appendChild(chip)
+            })
+            td.appendChild(col)
+
+            d++
+          }else{
+            td.innerHTML = '&nbsp;'
+          }
+          tr.appendChild(td)
+        }
+        tbody.appendChild(tr)
+        if(d>days) break
+      }
+
+      document.getElementById('calendarTitle').textContent = `${y} 年 ${m+1} 月`
+    }
+
+    function changeMonth(delta){
+      current.setMonth(current.getMonth()+delta)
+      buildCalendar(current)
+    }
+    function goToday(){
+      current = new Date(); current.setDate(1)
+      buildCalendar(current)
+    }
+
+    // ———— Modal / Toast ————
+    function openModal(e){
+      const m = document.getElementById('modalOverlay')
+      const c = document.getElementById('modalContent')
+      c.innerHTML = `
+        <h3 style="margin-top:0">${e.title}</h3>
+        <p>${e.date}｜${e.place}｜${e.host}｜${e.price}</p>
+      `
+      m.style.display = 'flex'
+    }
+    function closeModal(){ document.getElementById('modalOverlay').style.display = 'none' }
+
+    function showToast(msg){
+      const t = document.getElementById('toast')
+      t.textContent = msg; t.style.display='block'
+      setTimeout(()=> t.style.display='none', 1600)
+    }
+
+    // ———— Auth （示意） ————
+    function handleLogin(){ showToast('登入成功') }
+    function handleRegister(){ showToast('註冊完成') }
+    function handleAddEvent(){ showToast('已新增活動') }
+
+    // ———— Init ————
+    renderHome(); buildCalendar(current)
+  </script>
+</body>
+</html>
