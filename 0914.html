@@ -69,7 +69,7 @@
     .input-dark:focus{border-color:var(--input-focus);box-shadow:0 0 0 3px #3aa0ff33}
     textarea.input-dark{min-height:110px;resize:vertical}
 
-    /* ======（重點改動）行事曆：一屏整月、每格等高、名稱省略、最多兩筆 ====== */
+    /* ======（原有）行事曆：一屏整月、每格等高 ====== */
     .calendar-header-dark{display:flex;justify-content:center;align-items:center;gap:10px;background:var(--panel);padding:14px 0 10px;border-radius:14px 14px 0 0;box-shadow:var(--shadow-1);flex-wrap:wrap}
     .calendar-outer-dark{background:var(--panel);border-radius:0 0 16px 16px;box-shadow:var(--shadow-2);padding:0 0 12px}
     .weekday-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:var(--grid-gap);padding:10px 10px 6px}
@@ -92,7 +92,7 @@
       .day-num{font-size:1rem}
       .evt-pill{font-size:.88rem}
     }
-    /* ====== 行事曆改動到此為止 ====== */
+    /* ====== 行事曆原有樣式到此為止 ====== */
 
     @media (max-width:960px){.auth-wrap{grid-template-columns:1fr}}
     @media (max-width:540px){
@@ -106,18 +106,23 @@
     .contact-info a{color:var(--brand);text-decoration:underline}
 
     /* =======================
-       ✅ 依你的三項新要求新增的極小增量 CSS
-       1) 行事曆藍色膠囊（week 視圖膠囊 .calendar-activity-item）只顯示活動名稱 + 省略
-       3) 首頁近期活動名稱改白色
+       [MOD REQ#1] 行事曆「藍色膠囊」只顯示活動名稱；名稱過長省略
+       —— 僅限週/月格子內的 .calendar-activity-item，不影響彈窗與其他區塊
        ======================= */
-    /* [REQ#1] 只顯示活動名稱、過長省略（week 視圖） */
-    #calendar .calendar-activity-item{max-width:100%;}
-    #calendar .calendar-activity-item span:first-child{
-      min-width:0; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    #calendar .calendar-activity-col .calendar-activity-item{
+      display:block;               /* 撐滿行寬，讓 ellipsis 生效 */
+      max-width:100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
     }
-    #calendar .calendar-activity-item span + span{ display:none; }
+    #calendar .calendar-activity-col .calendar-activity-item span + span{
+      display:none !important;     /* 隱藏第二段（主辦單位） */
+    }
 
-    /* [REQ#3] 首頁近期活動名稱改白色 */
+    /* =======================
+       [MOD REQ#3] 首頁近期活動：活動名稱字色改白色（僅影響首頁卡片標題）
+       ======================= */
     #home .event-card strong{ color:#fff !important; }
   </style>
 
@@ -148,7 +153,7 @@
     <div class="cover-photo-frame">
       <div class="cover-photo-box">
         <!-- ★ 首頁圖片：保持你現有路徑 -->
-        <img id="coverPhoto" class="cover-photo" src="862daaea-9238-4795-8d40-c70e357b0f64.jpeg" alt="Cover">
+        <img id="coverPhoto" class="cover-photo" src="IMG_0441.jpeg" alt="Cover">
       </div>
     </div>
 
@@ -539,7 +544,7 @@
     }
     function renderCalendarByMode(){ if (calendarMode==='month') renderCalendar(currentMonth,currentYear); else if (calendarMode==='week') renderCalendarWeek(selectedDate); else renderCalendarList(); }
 
-    /* ======= 月檢視：一屏整月、每格等高、只顯示名稱、最多兩筆 ======= */
+    /* ======= 月檢視：一屏整月 ======= */
     function buildMonthPill(evt){
       const d=document.createElement('div');
       d.className='evt-pill';
@@ -714,7 +719,7 @@
                 <div style="border-bottom:1px solid #345;margin-bottom:11px;padding-bottom:10px;">
                   <strong style="color:#6ec6ff;">${evt.name || '未命名活動'}</strong><br>
                   <span style="color:#fff7b6;font-size:.99em;">@${evt.org || ''}</span><br>
-                  <!-- [REQ#2] 將「詳細」改「詳細資訊」，顏色改藍色 -->
+                  <!-- [MOD REQ#2] 「詳細」→「詳細資訊」，按鈕改藍色 -->
                   <button class="btn btn-blue" style="margin-top:8px;" onclick="event.stopPropagation(); showEventDetail(events[${evt._idx}],${evt._idx});">詳細資訊</button>
                 </div>
               `).join('')}
