@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>二戰下的非猶難民</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* === 基礎重置 === */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Noto Serif TC', serif;
+      background: #f9f5f0;
+      color: #444;
+      line-height: 1.8;
+      overflow-x: hidden;
+    }
+    h1, h2, h3 { font-family: 'Playfair Display', serif; }
+   
+    /* === 語言切換旗幟 === */
+    .lang-switch {
+      position: fixed;
+      top: 20px; right: 20px;
+      z-index: 1001;
+      display: flex;
+      gap: 8px;
+    }
+    .flag {
+      width: 28px; height: 28px;
+      cursor: pointer;
+      border-radius: 50%;
+      opacity: 0.6;
+      transition: 0.3s;
+      object-fit: cover;
+    }
+    .flag.active, .flag:hover { opacity: 1; transform: scale(1.1); }
+    /* === 導覽列 === */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: rgba(249, 245, 240, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      padding: 1rem 0;
+      transition: all 0.3s;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .navbar .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 500;
+      font-size: 1.1rem;
+      color: #8b7e6a;
+    }
+    .logo img { height: 36px; border-radius: 6px; }
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: #555;
+      font-weight: 500;
+      position: relative;
+      font-size: 0.95rem;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px; left: 0;
+      width: 0; height: 1.5px;
+      background: #8b7e6a;
+      transition: width 0.3s;
+    }
+    .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+    /* === 頁面切換 === */
+    .page { display: none; padding-top: 100px; min-height: 100vh; }
+    .page.active { display: block; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+    /* === 首頁：影片背景 === */
+    #home {
+      position: relative;
+      color: white;
+      text-align: center;
+      height: 100vh;
+    }
+    .hero-video {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: -2;
+    }
+    .overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: -1;
+    }
+    .hero-content {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 0 20px;
+    }
+    .hero-content h1 {
+      font-size: 3.8rem;
+      margin-bottom: 1rem;
+      text-shadow: 0 3px 15px rgba(0,0,0,0.6);
+      line-height: 1.2;
+    }
+    .hero-content .subtitle {
+      font-size: 1.6rem;
+      margin-bottom: 2rem;
+      font-weight: 300;
+      letter-spacing: 1px;
+    }
+    .btn {
+      background: #8b7e6a;
+      color: white;
+      padding: 14px 36px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: 0.3s;
+      display: inline-block;
+      box-shadow: 0 4px 15px rgba(139,126,106,0.3);
+    }
+    .btn:hover { background: #6b5e4a; transform: translateY(-3px); }
+    /* === 區塊標題 === */
+    .section-title {
+      text-align: center;
+      font-size: 2.5rem;
+      margin: 3rem 0 2rem;
+      color: #8b7e6a;
+    }
+    /* === 卡片 === */
+    .card {
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+    .card img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+    }
+    .card-body { padding: 20px; }
+    .card-title { font-size: 1.1rem; margin-bottom: 8px; color: #8b7e6a; }
+    .card-text { font-size: 0.95rem; color: #666; }
+    /* === 藝術品分頁 === */
+    .tab-nav {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      background: #eee;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+    .tab-btn.active {
+      background: #8b7e6a;
+      color: white;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    /* === 表格 === */
+    .form-card {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+      max-width: 600px;
+      margin: 2rem auto;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: #8b7e6a;
+    }
+    .form-control {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 1rem;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: #8b7e6a;
+      box-shadow: 0 0 0 3px rgba(139,126,106,0.1);
+    }
+    /* === 團隊卡片 === */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .team-card {
+      text-align: center;
+      padding: 1.5rem;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    .team-card h3 { color: #8b7e6a; margin-bottom: 0.5rem; }
+    /* === 響應式 === */
+    @media (max-width: 768px) {
+      .hero-content h1 { font-size: 2.5rem; }
+      .hero-content .subtitle { font-size: 1.3rem; }
+      .nav-links { gap: 1rem; font-size: 0.9rem; }
+      .navbar .container { flex-direction: column; gap: 10px; }
+      .tab-nav { gap: 0.5rem; }
+      .tab-btn { padding: 8px 14px; font-size: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 語言切換 -->
+  <div class="lang-switch">
+    <img src="https://flagcdn.com/w40/tw.png" alt="TW" class="flag active" data-lang="zh">
+    <img src="https://flagcdn.com/w40/gb.png" alt="EN" class="flag" data-lang="en">
+  </div>
+  <!-- 導覽列 -->
+  <nav class="navbar">
+    <div class="container">
+      <div class="logo">
+        <img src="https://i.ibb.co/NdmnGs1N/logo.png" alt="Logo">
+        <span data-zh="二戰下的非猶難民" data-en="Non-Jewish Refugees in WWII">二戰下的非猶難民</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#home" class="active" data-zh="首頁" data-en="Home">首頁</a></li>
+        <li><a href="#exhibition" data-zh="展覽資訊" data-en="Exhibition">展覽資訊</a></li>
+        <li><a href="#artworks" data-zh="藝術品" data-en="Artworks">藝術品</a></li>
+        <li><a href="#about" data-zh="關於我們" data-en="About Us">關於我們</a></li>
+        <li><a href="#ticket" data-zh="購票" data-en="Tickets">購票</a></li>
+      </ul>
+    </div>
+  </nav>
+  <!-- 首頁 -->
+  <div id="home" class="page active">
+    <video autoplay muted loop playsinline class="hero-video">
+      <source src="https://www.youtube.com/embed/gmjowbjsVWY?autoplay=1&mute=1&loop=1&playlist=gmjowbjsVWY&controls=0&modestbranding=1" type="video/mp4">
+    </video>
+    <div class="overlay"></div>
+    <div class="hero-content">
+      <h1 data-zh="二戰下的非猶難民" data-en="Non-Jewish Refugees in WWII">二戰下的非猶難民</h1>
+      <p class="subtitle" data-zh="Beyond the Holocaust: Non-Jewish Refugees in the Second World War"
+         data-en="Beyond the Holocaust: Non-Jewish Refugees in the Second World War">
+        Beyond the Holocaust: Non-Jewish Refugees in the Second World War
+      </p>
+      <!-- 首頁立即訂票按鈕已依需求移除 -->
+    </div>
+  </div>
+  <!-- 展覽資訊 -->
+  <div id="exhibition" class="page">
+    <div class="container">
+      <h1 class="section-title" data-zh="展覽資訊" data-en="Exhibition Information">展覽資訊</h1>
+      <div class="form-card">
+        <p>
+          <strong data-zh="時間" data-en="Date">時間：</strong>
+          <span
+            data-zh="西元2045年8月15日(二戰終戰100周年)——無限期展出，為常設展"
+            data-en="August 15, 2045 (100th anniversary of WWII end) — Permanent exhibition">
+            西元2045年8月15日(二戰終戰100周年)——無限期展出，為常設展
+          </span>
+        </p>
+        <p>
+          <strong data-zh="地點" data-en="Venue">地點：</strong>
+          <span
+            data-zh="目前中正紀念堂，之後將改建為轉型正義博物館"
+            data-en="Currently Chiang Kai-Shek Memorial Hall, will be transformed into Transitional Justice Museum">
+            目前中正紀念堂，之後將改建為轉型正義博物館
+          </span>
+        </p>
+        <p>
+          <strong data-zh="開放對象" data-en="Eligibility">開放對象：</strong>
+          <span
+            data-zh="年齡滿15周歲之民眾(不分國籍)"
+            data-en="Visitors aged 15 and above (all nationalities)">
+            年齡滿15周歲之民眾(不分國籍)
+          </span>
+        </p>
+        <p>
+          <strong data-zh="費用" data-en="Fee">費用：</strong>
+          <span
+            data-zh="持有我國身分證免費入場，若否則為100NTD/人"
+            data-en="Free for ROC ID holders; otherwise 100 NTD/person">
+            持有我國身分證免費入場，若否則為100NTD/人
+          </span>
+        </p>
+        <p>
+          <strong data-zh="展覽主題" data-en="Themes">展覽主題：</strong>
+          <span
+            data-zh="東歐、歐洲、東亞、東南亞"
+            data-en="Eastern Europe, Europe, East Asia, Southeast Asia">
+            東歐、歐洲、東亞、東南亞
+          </span>
+        </p>
+        <hr style="margin:1.5rem 0; border-color:#eee;">
+        <p
+          data-zh="本展覽將不同攝影者拍下的照片進行地區的分類，並以投影的方式將照片呈現於牆面，透過周遭暗紅的光線以及悲傷的旋律使照片更有感染力。若要移動至下一個展間則需要透過展覽場的火車軌道移動至下一個展間，讓觀者體驗當時百姓及戰俘不知道要被送往何方的無助感，在最後一個展廳出去時則象徵迎向光明的未來，寓意著歷史的悲劇已經發生但我們仍要面對並向前走。"
+          data-en="Photographs are categorized by region and projected onto walls, enhanced by dim red lighting and sorrowful melodies. Visitors move via train tracks to experience the helplessness of civilians and prisoners. The final exit symbolizes light, signifying we must confront history and move forward.">
+          本展覽將不同攝影者拍下的照片進行地區的分類，並以投影的方式將照片呈現於牆面，透過周遭暗紅的光線以及悲傷的旋律使照片更有感染力。若要移動至下一個展間則需要透過展覽場的火車軌道移動至下一個展間，讓觀者體驗當時百姓及戰俘不知道要被送往何方的無助感，在最後一個展廳出去時則象徵迎向光明的未來，寓意著歷史的悲劇已經發生但我們仍要面對並向前走。
+        </p>
+      </div>
+    </div>
+  </div>
+  <!-- 藝術品 -->
+  <div id="artworks" class="page">
+    <div class="container">
+      <h1 class="section-title" data-zh="藝術品" data-en="Artworks">藝術品</h1>
+     
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="eastEurope" data-zh="東歐" data-en="Eastern Europe">東歐</button>
+        <button class="tab-btn" data-tab="europe" data-zh="歐洲" data-en="Europe">歐洲</button>
+        <button class="tab-btn" data-tab="eastAsia" data-zh="東亞" data-en="East Asia">東亞</button>
+        <button class="tab-btn" data-tab="seAsia" data-zh="東南亞" data-en="Southeast Asia">東南亞</button>
+      </div>
+      <!-- 東歐：B1–B4 -->
+      <div id="eastEurope" class="tab-content active">
+        <div style="display:grid;gap:30px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));">
+          <div class="card">
+            <img src="https://www.isral.it/wp-content/uploads/2019/01/prigionieri-mutilati.jpg" alt="B1">
+            <div class="card-body">
+              <h3 class="card-title">B1</h3>
+              <p class="card-text"
+                 data-zh="茂特豪森-古森集中營內關押社會主義者、共產主義者和同性戀者以及身心障礙人士等，他們在此被強迫勞動，在被釋放前遭到肢解。"
+                 data-en="Prisoners in Mauthausen-Gusen camp who were dismembered before release.">
+                茂特豪森-古森集中營內關押社會主義者、共產主義者和同性戀者以及身心障礙人士等，他們在此被強迫勞動，在被釋放前遭到肢解。
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <img src="https://collections.ushmm.org/iiif-b/assets/715339" alt="B2">
+            <div class="card-body">
+              <h3 class="card-title">B2</h3>
+              <p class="card-text"
+                 data-zh="集中營內許多納粹德國軍官以及科學家使用不人道的方式進行人體實驗，像是在沒有麻醉的情況下進行胃、腎、肝和腦手術或是隨機進行人體解剖等。該集中營被波蘭媒體稱為「人類最可怕的噩夢(najgorszy koszmar ludzkości)」"
+                 data-en="Inhuman medical experiments conducted in camps, described as humanity’s worst nightmare.">
+                集中營內許多納粹德國軍官以及科學家使用不人道的方式進行人體實驗，像是在沒有麻醉的情況下進行胃、腎、肝和腦手術或是隨機進行人體解剖等。該集中營被波蘭媒體稱為「人類最可怕的噩夢(najgorszy koszmar ludzkości)」
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/59/Bundesarchiv_Bild_192-208%2C_KZ_Mauthausen%2C_Sowjetische_Kriegsgefangene.jpg" alt="B3">
+            <div class="card-body">
+              <h3 class="card-title">B3</h3>
+              <p class="card-text"
+                 data-zh="茂特豪森-古森集中營中瘦弱的蘇聯戰俘。"
+                 data-en="Emaciated Soviet POWs in Mauthausen-Gusen.">
+                茂特豪森-古森集中營中瘦弱的蘇聯戰俘。
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Buchenwald_Disabled_Jews_13132_crop.jpg/960px-Buchenwald_Disabled_Jews_13132_crop.jpg" alt="B4">
+            <div class="card-body">
+              <h3 class="card-title">B4</h3>
+              <p class="card-text"
+                 data-zh="1939 年 9 月 1 日，納粹德國頒布了「安樂死計畫」（charitable death）或「T4 行動」（Aktion T4），象徵納粹政權針對身心障礙者與精神疾病患者的大規模屠殺的開始。此舉體現了納粹意識形態中結合人類學種族主義與醫學軀體主義的極端思維。最初的殺害方式以一氧化碳中毒為主，成為日後「猶太問題最終解決方案」的原型。1941 年起，計畫進入第二階段，即所謂「隱秘安樂死」，改以注射鴉片類藥物、東莨菪鹼（scopolamina）或低劑量巴比妥酸鹽等手段致死，並輔以極端的營養剝奪與冬季停止供暖等措施。最終，這場以醫療為名的屠殺奪去了超過二十五萬名患者的生命，成為醫學史上最為駭人且沉痛的罪行之一。照片中呈現的是穿著囚服身心障礙者，他們面帶無奈與迷茫，不知如何是好。"
+                 data-en="Aktion T4, the Nazi euthanasia program targeting the disabled and mentally ill.">
+                1939 年 9 月 1 日，納粹德國頒布了「安樂死計畫」（charitable death）或「T4 行動」（Aktion T4），象徵納粹政權針對身心障礙者與精神疾病患者的大規模屠殺的開始。此舉體現了納粹意識形態中結合人類學種族主義與醫學軀體主義的極端思維。最初的殺害方式以一氧化碳中毒為主，成為日後「猶太問題最終解決方案」的原型。1941 年起，計畫進入第二階段，即所謂「隱秘安樂死」，改以注射鴉片類藥物、東莨菪鹼（scopolamina）或低劑量巴比妥酸鹽等手段致死，並輔以極端的營養剝奪與冬季停止供暖等措施。最終，這場以醫療為名的屠殺奪去了超過二十五萬名患者的生命，成為醫學史上最為駭人且沉痛的罪行之一。照片中呈現的是穿著囚服身心障礙者，他們面帶無奈與迷茫，不知如何是好。
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 歐洲：A1–A4 -->
+      <div id="europe" class="tab-content">
+        <div style="display:grid;gap:30px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));">
+          <div class="card">
+            <img src="https://www.camruss.com/wp-content/uploads/2017/03/Dystrophy-300x195.gif" alt="A1">
+            <div class="card-body">
+              <h3 class="card-title">A1</h3>
+              <p class="card-text"
+                 data-zh="二戰期間德國攻打蘇聯的列寧格勒，並展開為期872天的圍城，切斷了公共設施、食水、能源及糧食供應等等補給。估計約有超過100萬列寧格勒市民死亡。作者對照片的說明：營養不良症（飢餓病）是一種由長期營養不良引起的整體營養狀況紊亂，此時食物中的熱量不足以滿足人體消耗的能量。戰後，這種營養不良症又獲得了一個非正式名稱：「列寧格勒病」。"
+                 data-en="Civilians suffering malnutrition during the 872-day siege of Leningrad.">
+                二戰期間德國攻打蘇聯的列寧格勒，並展開為期872天的圍城，切斷了公共設施、食水、能源及糧食供應等等補給。估計約有超過100萬列寧格勒市民死亡。作者對照片的說明：營養不良症（飢餓病）是一種由長期營養不良引起的整體營養狀況紊亂，此時食物中的熱量不足以滿足人體消耗的能量。戰後，這種營養不良症又獲得了一個非正式名稱：「列寧格勒病」。
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Katyn_Massacre_-_Mass_Graves_2.jpg" alt="A2">
+            <div class="card-body">
+              <h3 class="card-title">A2</h3>
+              <p class="card-text"
+                 data-zh="蘇聯於1939年入侵波蘭後，展開對菁英階層、戰俘以及百姓的清洗行動，因位於卡廷森林而得名，而蘇聯長期否認屠殺是由其所為，直到1990年才公開承認。"
+                 data-en="After invading Poland in 1939, the Soviets carried out the Katyn Massacre against elites, POWs and civilians.">
+                蘇聯於1939年入侵波蘭後，展開對菁英階層、戰俘以及百姓的清洗行動，因位於卡廷森林而得名，而蘇聯長期否認屠殺是由其所為，直到1990年才公開承認。
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <img src="https://p0.ifengimg.com/pmop/2017/0528/BCAAEC3EEC98887F4CED2F553FED295339BAE402_size72_w388_h509.jpeg" alt="A3">
+            <div class="card-body">
+              <h3 class="card-title">A3</h3>
+              <p class="card-text"
+                 data-zh="同上"
+                 data-en="Same context as A2, another body from the Katyn Massacre.">
+                同上
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <img src="https://i.ntdtv.com/assets/uploads/2017/04/p8106871a578769426-ss.jpg" alt="A4">
+            <div class="card-body">
+              <h3 class="card-title">A4</h3>
+              <p class="card-text"
+                 data-zh="同上"
+                 data-en="Same context as A2, another view of the Katyn Massacre.">
+                同上
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 東亞（依文件編號 C1–C4：泰緬鐵路、肅清大屠殺、巴丹行軍） -->
+      <div id="eastAsia" class="tab-content">
+        <div style="display:grid;gap:30px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));">
+          <div class="card">
+            <img src="https://pic2.zhimg.com/v2-9a9935e50f9b5953b9ab8e05774fe605_1440w.jpg" alt="C1">
+            <div class="card-body">
+              <h3 class="card-title">C1</h3>
+              <p class="card-text"
+                 data-zh="日本在第二次世界大戰期間為了佔領英屬緬甸並切斷中華民國向外的補給線而建造的，然而日本動用了大量勞力不乏平民、戰俘等因為其龐大的工作量而死亡"
+                 data-en="The Thai–Burma railway built by Japan to cut off supplies to China, costing many civilian and POW lives.">
+                日本在第二次世界大戰期間為了佔領英屬緬甸並切斷中華民國向外的補給線而建造的，然而日本動用了大量勞力不乏平民、戰俘等因為其龐大的工作量而死亡
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <img src="https://static.ctwant.com/images/cover/15/223515/md-5bf2177c3e158e8b33429b8e3230c8be.jpg" alt="C2">
+            <div class="card-body">
+              <h3 class="card-title">C2</h3>
+              <p class="card-text"
+                 data-zh="同上"
+                 data-en="Same as C1, another view related to the Thai–Burma railway.">
+                同上
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <img src="https://img.allhistory.com/5f73087f550c6f0001d32747.jpg?imageView2/2/w/3388/|imageMogr2/strip/interlace/1/quality/75/format/jpg" alt="C3">
+            <div class="card-body">
+              <h3 class="card-title">C3</h3>
+              <p class="card-text"
+                 data-zh="日軍在二戰時期佔領了新加坡及馬來西亞，並在當地進行度規模的屠殺華人行動因惟恐華人會成為中國的助力。死傷人數約50000到100000左右"
+                 data-en="During WWII, the Japanese occupation of Singapore and Malaya led to the Sook Ching Massacre of ethnic Chinese, with 50,000–100,000 victims.">
+                日軍在二戰時期佔領了新加坡及馬來西亞，並在當地進行度規模的屠殺華人行動因惟恐華人會成為中國的助力。死傷人數約50000到100000左右
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/NA_127-N-114541.jpg/1280px-NA_127-N-114541.jpg" alt="C4">
+            <div class="card-body">
+              <h3 class="card-title">C4</h3>
+              <p class="card-text"
+                 data-zh="日軍對菲律賓巴丹半島投降的76,000至78,000名美國與菲律賓戰俘實施強迫行軍、虐待、屠殺的暴行"
+                 data-en="The Bataan Death March, in which 76,000–78,000 American and Filipino POWs were forced to march under brutal conditions.">
+                日軍對菲律賓巴丹半島投降的76,000至78,000名美國與菲律賓戰俘實施強迫行軍、虐待、屠殺的暴行
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 東南亞（依文件編號 D1–D4：慰安婦、日本童工） -->
+      <div id="seAsia" class="tab-content">
+        <div style="display:grid;gap:30px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));">
+          <div class="card">
+            <img src="https://collections.culture.tw/files/12/JPG640/093000700000.JPG" alt="D1">
+            <div class="card-body">
+              <h3 class="card-title">D1</h3>
+              <p class="card-text"
+                 data-zh="二戰期間日軍對佔領的地區強搶婦女，為日本士兵排解性慾。其中地區包括中國、韓國、日本、台灣以及不同國籍的戰俘"
+                 data-en="During WWII, Japanese forces seized women from occupied areas—including China, Korea, Japan, Taiwan and POWs—to serve as ‘comfort women’.">
+                二戰期間日軍對佔領的地區強搶婦女，為日本士兵排解性慾。其中地區包括中國、韓國、日本、台灣以及不同國籍的戰俘
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Captured_comfort_women_in_Myitkyina_on_August_14_in_1944.jpg/250px-Captured_comfort_women_in_Myitkyina_on_August_14_in_1944.jpg" alt="D2">
+            <div class="card-body">
+              <h3 class="card-title">D2</h3>
+              <p class="card-text"
+                 data-zh="同上"
+                 data-en="Same as D1, showing Korean comfort women captured by Allied forces.">
+                同上
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/The_Allied_Reoccupation_of_the_Andaman_Islands%2C_1945_SE5226.jpg/250px-The_Allied_Reoccupation_of_the_Andaman_Islands%2C_1945_SE5226.jpg" alt="D3">
+            <div class="card-body">
+              <h3 class="card-title">D3</h3>
+              <p class="card-text"
+                 data-zh="同上；盟軍佔領安達曼群島時拍攝的圖片"
+                 data-en="Same as D1; photo taken when the Allies reoccupied the Andaman Islands.">
+                同上；盟軍佔領安達曼群島時拍攝的圖片
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <img src="https://image.aflo.com/resources/speciald/10_12750.jpg" alt="D4">
+            <div class="card-body">
+              <h3 class="card-title">D4</h3>
+              <p class="card-text"
+                 data-zh="二戰期間各國因為成年男性被徵招入伍工廠缺少勞動力，所以徵招童工到工廠，每天工作時數高，並且被限制自由。昭和館名稱:「ヤスリがけに励む国民学校女子児童」(努力搞生產的國民女校孩童)"
+                 data-en="During WWII, as adult men were drafted, child labor was used in factories for long hours with restricted freedom. Shōwakan title: 「ヤスリがけに励む国民学校女子児童」.">
+                二戰期間各國因為成年男性被徵招入伍工廠缺少勞動力，所以徵招童工到工廠，每天工作時數高，並且被限制自由。昭和館名稱:「ヤスリがけに励む国民学校女子児童」(努力搞生產的國民女校孩童)
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 關於我們 -->
+  <div id="about" class="page">
+    <div class="container">
+      <h1 class="section-title" data-zh="關於我們" data-en="About Us">關於我們</h1>
+      <div class="team-grid">
+        <div class="team-card">
+          <h3>12 徐子暘</h3>
+          <p data-zh="總策展人" data-en="Chief Curator">總策展人</p>
+        </div>
+        <div class="team-card">
+          <h3>17 陳紹宇</h3>
+          <p data-zh="設計總監" data-en="Design Director">設計總監</p>
+        </div>
+        <div class="team-card">
+          <h3>05 王柏淮</h3>
+          <p data-zh="財務兼網站負責人" data-en="Finance & Web Manager">財務兼網站負責人</p>
+        </div>
+        <div class="team-card">
+          <h3>30 蔡曜任</h3>
+          <p data-zh="文書兼公關部長" data-en="Documentation & PR">文書兼公關部長</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 購票 -->
+  <div id="ticket" class="page">
+    <div class="container" style="max-width:600px;">
+      <h1 class="section-title" data-zh="購票" data-en="Purchase Tickets">購票</h1>
+      <form id="ticket-form" class="form-card">
+        <div class="form-group">
+          <label data-zh="姓名" data-en="Name">姓名</label>
+          <input type="text" class="form-control" placeholder="請輸入姓名" required>
+        </div>
+        <div class="form-group">
+          <label data-zh="電子郵件" data-en="Email">電子郵件</label>
+          <input type="email" class="form-control" placeholder="example@email.com" required>
+        </div>
+        <div class="form-group">
+          <label data-zh="電話" data-en="Phone">電話</label>
+          <input type="tel" class="form-control" placeholder="0912-345-678">
+        </div>
+        <div class="form-group">
+          <label data-zh="國籍" data-en="Nationality">國籍</label>
+          <select class="form-control" required>
+            <option value="" disabled selected>請選擇國籍</option>
+            <option value="ROC" data-zh="中華民國" data-en="Republic of China">中華民國</option>
+            <option value="Other" data-zh="其他" data-en="Other">其他</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label data-zh="票數" data-en="Number of Tickets">票數</label>
+          <select class="form-control">
+            <option>1 張</option>
+            <option>2 張</option>
+            <option>3 張</option>
+            <option>4 張</option>
+            <option>5 張以上</option>
+          </select>
+        </div>
+        <button type="submit" class="btn" style="margin-top:1rem;" data-zh="送出訂單" data-en="Submit Order">送出訂單</button>
+      </form>
+    </div>
+  </div>
+  <script>
+    // 頁面切換
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const target = link.getAttribute('href');
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelector(target).classList.add('active');
+        document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+        link.classList.add('active');
+      });
+    });
+    // 語言切換
+    document.querySelectorAll('.flag').forEach(flag => {
+      flag.addEventListener('click', () => {
+        const lang = flag.dataset.lang;
+        document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+        document.querySelectorAll('.flag').forEach(f => f.classList.remove('active'));
+        flag.classList.add('active');
+        document.querySelectorAll('[data-zh],[data-en]').forEach(el => {
+          if (el.dataset[lang]) {
+            el.textContent = el.dataset[lang];
+          }
+        });
+        // 更新 select 選項
+        document.querySelectorAll('select option').forEach(opt => {
+          if (opt.dataset[lang]) {
+            opt.textContent = opt.dataset[lang];
+          }
+        });
+      });
+    });
+    // 藝術品分頁
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelector('#' + tab).classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const lang = document.documentElement.lang.startsWith('zh') ? 'zh' : 'en';
+        btn.textContent = btn.dataset[lang];
+      });
+    });
+    // 表單送出
+    document.getElementById('ticket-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const isZh = document.documentElement.lang.startsWith('zh');
+      alert(isZh ? '感謝您！票券已預訂成功，我們會盡快與您聯繫。' : 'Thank you! Your tickets have been booked. We will contact you soon.');
+      e.target.reset();
+    });
+  </script>
+</body>
+</html>
