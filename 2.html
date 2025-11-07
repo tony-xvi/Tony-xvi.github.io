@@ -17,6 +17,22 @@
     }
     h1, h2, h3 { font-family: 'Playfair Display', serif; }
 
+    /* 按鈕 */
+    .btn {
+      background: #8b7e6a;
+      color: white;
+      padding: 14px 36px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: 0.3s;
+      display: inline-block;
+      box-shadow: 0 4px 15px rgba(139,126,106,0.3);
+      border: none;
+      cursor: pointer;
+    }
+    .btn:hover { background: #6b5e4a; transform: translateY(-3px); }
+
     /* 語言切換 */
     .lang-switch {
       position: fixed;
@@ -53,6 +69,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
     }
     .logo {
       display: flex;
@@ -91,19 +109,19 @@
     .page.active { display: block; }
     .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
 
-    /* 首頁：海報背景（可滾動看上下半部） */
+    /* 首頁：海報背景 */
     #home {
       position: relative;
       color: white;
       text-align: center;
-      height: 200vh; /* 多一倍高度讓使用者可以往下捲 */
+      min-height: 200vh; /* 讓使用者有空間把海報從上到下滑完 */
     }
     .hero-poster {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100vh;
       object-fit: cover;
-      object-position: center top; /* 一開始只看上半部 */
+      object-position: center top; /* 一開始只看海報上半部 */
       z-index: -2;
       cursor: pointer;
     }
@@ -243,6 +261,16 @@
       line-height: 1.7;
       white-space: pre-line;
     }
+    .group-photo-wrapper {
+      max-width: 800px;
+      margin: 0 auto 2rem;
+    }
+    .group-photo {
+      width: 100%;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      display: block;
+    }
 
     /* 文創商品 */
     .product-list {
@@ -323,12 +351,9 @@
       .hero-content h1 { font-size: 2.5rem; }
       .hero-content .subtitle { font-size: 1.3rem; }
       .nav-links { gap: 1rem; font-size: 0.9rem; }
-      .navbar .container { flex-direction: column; gap: 10px; }
+      .navbar .container { flex-direction: column; }
       .tab-nav { gap: 0.5rem; }
       .tab-btn { padding: 8px 14px; font-size: 0.9rem; }
-      .product-item {
-        flex-direction: row;
-      }
       .product-img {
         width: 70px;
         height: 70px;
@@ -653,28 +678,28 @@
       <h1 class="section-title" data-zh="文創商品" data-en="Cultural & Creative Goods">文創商品</h1>
       <div class="product-list">
         <div class="product-item">
-          <img src="https://i.ibb.co/6Rfb53z2/your-jacket.jpg" alt="夾克" class="product-img">
+          <img src="https://i.ibb.co/svMQr0nh/IMG-0926.jpg" alt="夾克" class="product-img">
           <div class="product-info">
             <h3 data-zh="夾克" data-en="Jacket">夾克</h3>
             <p data-zh="售價：500元" data-en="Price: 500 NTD">售價：500元</p>
           </div>
         </div>
         <div class="product-item">
-          <img src="https://i.ibb.co/XfmRV7fB/your-hoodie.jpg" alt="帽踢" class="product-img">
+          <img src="https://i.ibb.co/9mR5GbmX/IMG-0925.jpg" alt="帽踢" class="product-img">
           <div class="product-info">
             <h3 data-zh="帽踢" data-en="Hoodie">帽踢</h3>
             <p data-zh="售價：500元" data-en="Price: 500 NTD">售價：500元</p>
           </div>
         </div>
         <div class="product-item">
-          <img src="https://i.ibb.co/qFJDkXVy/your-tshirt.jpg" alt="T-shirt" class="product-img">
+          <img src="https://i.ibb.co/yB4NWG7f/IMG-0924.jpg" alt="T-shirt" class="product-img">
           <div class="product-info">
             <h3 data-zh="T-shirt" data-en="T-shirt">T-shirt</h3>
             <p data-zh="售價：200元" data-en="Price: 200 NTD">售價：200元</p>
           </div>
         </div>
         <div class="product-item">
-          <img src="https://i.ibb.co/bgyzKrsB/your-badge.jpg" alt="紀念徽章" class="product-img">
+          <img src="https://i.ibb.co/KjQFr92q/IMG-0923.jpg" alt="紀念徽章" class="product-img">
           <div class="product-info">
             <h3 data-zh="紀念徽章" data-en="Badge">紀念徽章</h3>
             <p data-zh="售價：100元" data-en="Price: 100 NTD">售價：100元</p>
@@ -688,6 +713,12 @@
   <div id="about" class="page">
     <div class="container">
       <h1 class="section-title" data-zh="關於我們" data-en="About Us">關於我們</h1>
+
+      <!-- 團照 -->
+      <div class="group-photo-wrapper">
+        <img src="https://i.ibb.co/PvmNzPNB/IMG-0929.jpg" alt="策展團隊合照" class="group-photo">
+      </div>
+
       <div class="team-grid">
         <div class="team-card">
           <h3>12 徐子暘</h3>
@@ -710,14 +741,44 @@
 我長期關注社會與歷史議題，這些經驗讓我深刻意識到制度、國家與個人生命之間的張力。我相信戰爭是國家暴力的極致，而軍隊作為其核心工具，往往不是保護的象徵，而是侵略的起點。因此，我堅信軍隊終將應被廢除，並由非武力的安全體系、國際合作與對生命更深刻的尊重取而代之。透過本次策展，我希望讓被忽略的歷史重新被看見，也邀請每位觀者思考：和平是否能在沒有軍隊的前提下，依然成立並被實踐。
           </div>
         </div>
+
         <div class="team-card">
           <h3>17 陳紹宇</h3>
-          <p data-zh="設計總監" data-en="Design Director">設計總監</p>
+          <p data-zh="展場敘事與動線設計" data-en="Spatial Narrative & Flow Design">展場敘事與動線設計</p>
+          <div class="team-bio">
+陳紹宇
+
+學歷
+·真善美幼兒園
+·獅湖國民小學
+·正興國民中學
+·高雄高級中學
+•Parsons School of Design
+美國帕森斯設計學院｜空間設計系 BFA
+•Royal College of Art 
+英國皇家藝術學院｜Curating Contemporary Art 碩士
+•MIT Media Lab
+麻省理工媒體實驗室｜沉浸式敘事空間研究訪問研究員
+
+經歷
+•史密森尼國家歷史博物館｜展場敘事顧問
+•柏林猶太博物館｜空間語言與展示策略研究團隊成員
+•國家人權博物館｜常設展敘事動線統籌
+•亞洲沉浸式影像藝術節｜展場總監
+•柬埔寨 S-21 屠殺紀念館再解讀計畫｜展示系統整合負責人
+•獨立展場與敘事系統設計工作室｜主辦人
+
+自傳 / 理念
+我從事展場敘事與動線控制，負責把歷史、影像、遺留物與建築語言整合成可被「走過、看見、記住」的空間。
+展覽不是作品的堆疊，而是記憶如何被重新理解的過程。
+          </div>
         </div>
+
         <div class="team-card">
           <h3>05 王柏淮</h3>
           <p data-zh="財務兼網站負責人" data-en="Finance & Web Manager">財務兼網站負責人</p>
         </div>
+
         <div class="team-card">
           <h3>30 蔡曜任</h3>
           <p data-zh="文書兼公關部長" data-en="Documentation & PR">文書兼公關部長</p>
@@ -905,18 +966,17 @@
 
       const scrollY = window.scrollY;
       const windowHeight = window.innerHeight || document.documentElement.clientHeight;
-      const maxScroll = windowHeight; // 前一個視窗高度內完成動畫
-      const rawProgress = scrollY / maxScroll;
+      const rawProgress = scrollY / windowHeight;
       const progress = Math.min(Math.max(rawProgress, 0), 1);
 
       if (heroContent) {
         heroContent.style.opacity = String(1 - progress);
       }
       if (overlay) {
-        overlay.style.opacity = String(1 - progress * 0.6); // 稍微淡一點
+        overlay.style.opacity = String(1 - progress * 0.6);
       }
       if (poster) {
-        const posY = progress * 50; // 0% -> 50%，往下移顯示下半部
+        const posY = progress * 100; // 從上到下完整看過海報
         poster.style.objectPosition = `center ${posY}%`;
       }
     });
