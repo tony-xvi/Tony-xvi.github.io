@@ -1,14 +1,381 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
-    <meta charset="utf-8">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>打造你的理想型</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+    body { font-family: 'Noto Sans TC', system-ui, sans-serif; }
+
+    .mobile-frame {
+      max-width: 428px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: #fff;
+      box-shadow: 0 0 30px rgba(0,0,0,0.1);
+      border-radius: 48px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    @media (max-width: 380px) {
+      .mobile-frame { border-radius: 32px; max-width: 100%; margin: 0; box-shadow: none; }
+    }
+
+    .tag-container { display: flex; flex-wrap: wrap; gap: 10px; padding: 8px 0; }
+    .tag {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      font-size: 15px;
+      font-weight: 500;
+      border-radius: 9999px;
+      border: 2px solid #e5e7eb;
+      background-color: #fff;
+      color: #374151;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    .tag:hover { border-color: #fbb6d0; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(249, 115, 173, 0.15); }
+    .tag.selected {
+      background: linear-gradient(90deg, #ff4d94, #c026d3);
+      color: white;
+      border-color: #ff4d94;
+      box-shadow: 0 4px 15px rgba(249, 115, 173, 0.4);
+      transform: scale(1.06);
+    }
+    .tag i { font-size: 13px; opacity: 0; transition: all 0.2s; }
+    .tag.selected i { opacity: 1; }
+
+    .bottom-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 428px;
+      background: white;
+      border-top: 1px solid #e5e7eb;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+      padding: 14px 20px;
+      z-index: 50;
+    }
+
+    .match-card {
+      background: linear-gradient(135deg, #fffbeb 0%, #fdf4ff 100%);
+      border-radius: 28px;
+      padding: 28px 24px;
+      box-shadow: 0 20px 40px -10px rgba(249, 115, 173, 0.25);
+    }
+    .avatar-img {
+      width: 180px;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 24px;
+      box-shadow: 0 10px 25px rgba(249, 115, 173, 0.4);
+      transition: filter 0.4s ease;
+      cursor: pointer;
+    }
+
+    .dual-range {
+      position: relative;
+      height: 44px;
+    }
+    .dual-range input[type="range"] {
+      position: absolute;
+      width: 100%;
+      height: 44px;
+      top: 0;
+      left: 0;
+      background: transparent;
+      pointer-events: none;
+      -webkit-appearance: none;
+    }
+    .dual-range input[type="range"]::-webkit-slider-thumb {
+      pointer-events: auto;
+      -webkit-appearance: none;
+      width: 28px;
+      height: 28px;
+      background: #ff4d94;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(255, 77, 148, 0.3);
+      cursor: pointer;
+      border: 3px solid white;
+    }
+    .dual-range .track-bg {
+      position: absolute;
+      top: 18px;
+      left: 12px;
+      right: 12px;
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+    .dual-range .track-fill {
+      position: absolute;
+      top: 18px;
+      left: 12px;
+      height: 8px;
+      background: linear-gradient(to right, #ff4d94, #a855f7);
+      border-radius: 9999px;
+    }
+  </style>
 </head>
-<body>
-    <em><strong>APPLE</strong></em>
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC8AAAA4CAMAAABaKlG9AAAAMFBMVEWzs7P///+urq7h4eH29vbu7u7ExMS3t7fZ2dm8vLzJycnPz8/n5+fe3t7y8vLk5ORrv+/6AAABhUlEQVRIiZWWWQKDIAxE0xgRRPD+ty270LqM/Dk8IoQs0OdhTCv57pPuactMPKP8FmgiFpDXkQ6j1254V3CF8b7gvGH8knFaBvWS36v5eZAveVNwPcpXvGTzvP7oV/zGp/glH53J7P70K16Hq7Unes97p60u3pY5RYFMVqkm9rzY8P801FQlvXCOoCBuI2+Lu9Mped1FtOFOIzZy8J76qWzxRwnaXvn5b+50xAWRFwxPsRH55ZnMuE72NWg+BTbBu8mBSoMn73BX/I9ZJ1Puy4PmS9qQw/ialbRi26mxSgrbTo1Bwi6rZT22m/f89nI/bf8G+8FL/xz+txj/9n5rVScwF3P2xviEk7HUB/DAYfjEo+mYLw3Px7hACbXOAC0wdHQehHeEx1zkU73CT2xz/YTNS+bBmGBb6znmIm71H7qDo/5jR177fgRE0dC/HpsA+5F/OEIJ/67/SjfJZJSiruUd9eFzLDD5zcCLzi82mVRewtQeNcN7YFe0KN0/H8WtxrQGHsYX6zoJOl8vYXAAAAAASUVORK5CYII=" />
-    <br><br>
-    <em><strong>Samsung</strong></em>
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAAfCAMAAACF8f6iAAAAb1BMVEX39/f///wAAAD+/v78/PqoqKfm5ubr6+rj5O4rOaVudbrm5++AhsEPJaDw8fUAAI95f76JjsVzeryZncszQKchMqNBTKuztdaPlMegpc9jarVdZbQADJuusdXKzOHW1+dKVa+/wt0YK6ICHp8AAJfb5xrnAAAA60lEQVQ4je2Vya6EIBBFi8FuBkUUwaEbQdv//8Z2WLOQ1ctL31AVIDkpuIsqwLh4wE09CowBP8ldDoA8MRQZ3E4WcPudlzKxn/60EEV7uuJY9Ay6p2uX5JrOKsU5SC4UF0R3Dul+GKU1fYmm6kVT4Lv3cnZdYJWbYyTbMsLkS8Ns9ELVpExVpIxHGLXwbNXNEEmoJiQOcG3KVm2zVSnQsXURZtDs499Lh7jcghi1YVv4tKqGOgmO9gXlPDeyDYJpYqygwUUmW9p6ZJxJ/RHoaSWll5/nkZ4m7xdw2PvT/1N2X83u5NmzI3dafQFlzAyeePrYTwAAAABJRU5ErkJggg==" />
-    <p href="https://www.apple.com/tw/?afid=p238%7Csd9nZSawW-dc_mtid_18707vxu38484_pcrid_713255549646_pgrid_12618487622_pntwk_g_pchan__pexid__&cid=aos-tw-kwgo-brand--slid---product-">apple</p>
+<body class="bg-gray-100 py-8">
+
+  <div class="mobile-frame mx-auto overflow-hidden flex flex-col">
+    <div class="flex-1 overflow-y-auto px-6 pb-24" id="mainContent"></div>
+
+    <div class="bottom-nav">
+      <button onclick="prevStep()" class="prev-btn flex items-center gap-1 text-gray-400 hover:text-gray-600">
+        <i class="fa-solid fa-chevron-left"></i> 上一步
+      </button>
+      <button onclick="nextStep()" id="nextBtn"
+        class="next-btn bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-3xl font-semibold flex-1">
+        下一步
+      </button>
+      <button onclick="finish()" class="finish-btn flex items-center gap-1 text-pink-500 font-medium hover:text-pink-600">
+        完成 <i class="fa-solid fa-check"></i>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let currentStep = 1;
+    let selectedTags = new Set();
+    let idealGender = '不限';
+    let currentCategories = null;
+
+    const genderCategories = {
+      male: {
+        2: { title: "外貌與身材", tags: ["帥氣","陽光","高顏值","笑容迷人","氣場強","六塊肌","八塊肌","健壯","運動型","高挑","長腿","模特兒身材","穿搭有型","成熟型","精緻五官","乾淨清爽","戴眼鏡文青風","皮膚好","五官立體","濃眉大眼","高鼻樑","虎背熊腰","腿長","肩寬","腹肌明顯","氣質型男","陽光運動風","斯文敗類","壞男孩氣質","暖男感","成熟穩重型"] },
+        3: { title: "學歷與事業", tags: ["全球百大","台灣頂尖","台清交成政","年收百萬以上","年收兩百萬以上","主管階級","夢幻企業","公司負責人","醫師","工程師","公務員","律師","金融業","科技業","高學歷","留學背景","碩士以上","博士","財務規劃佳","創業者","斜槓工程師","投資理財高手","穩定事業","高收入","有房","有車"] },
+        4: { title: "興趣與生活方式", tags: ["愛旅行","健身","爬山","看書","看電影","追劇","音樂","攝影","烹飪","咖啡","美食","會開車","桌遊","演唱會","露營","滑雪","衝浪","瑜伽","跑步","單車","游泳","電玩","KTV","運動","戶外活動","閱讀","寫作","畫畫","樂器","看展覽","追演唱會","旅行攝影","美食探店","咖啡廳","早起健身"] },
+        5: { title: "價值觀", tags: ["重視家庭","責任感","孝順","樂觀積極","善良","幽默","追求成長","財務獨立","成熟穩重","冒險精神","正能量","時間管理佳","環保意識","動物友善","誠實","忠誠","上進心","學習型人格","藝術感","閱讀習慣","平衡生活","理性思考","情感豐富","尊重他人","包容力強","有擔當","有耐心","感恩"] },
+        6: { title: "感情觀", tags: ["認真交往","想結婚","長期穩定","專一","浪漫","溝通良好","互相支持","家庭優先","共同成長","接受異地","一起旅行","平等關係","寵女友","不玩曖昧","願意努力","規劃未來","情感細膩","會哄人","會照顧人","長期陪伴","結婚優先","不婚主義","享受當下","互相成就"] },
+        7: { title: "家庭與未來規劃", tags: ["想生小孩","不想要小孩","接受異地","重視家庭","一起旅行","長期同居","結婚優先","買房計劃","養寵物","家庭聚會","父母同住","獨立生活","未來規劃明確","共同理財","一起養小孩","支持對方事業"] }
+      },
+      female: {
+        2: { title: "外貌與身材", tags: ["甜美","氣質","可愛型","長腿","高挑","模特兒身材","纖細","笑容迷人","知性","清秀","高顏值","可愛臉蛋","皮膚好","穿搭有型","氣場強","御姐風","鄰家女孩","文藝氣質","娃娃臉","大眼","小V臉","身材比例佳","腿細","腰細","氣質美女","甜美可愛","成熟性感","清純","優雅"] },
+        3: { title: "學歷與事業", tags: ["全球百大","台灣頂尖","年收百萬以上","高學歷","留學背景","穩定事業","醫師","工程師","教師","財務規劃佳","公務員","律師","金融業","創業者","碩士以上","博士","有房","有車","主管階級","夢幻企業"] },
+        4: { title: "興趣與生活方式", tags: ["愛旅行","瑜伽","看書","看電影","追劇","音樂","攝影","烹飪","咖啡","美食","寵物","露營","早睡早起","健身","爬山","畫畫","手作","插花","閱讀","追星","看展覽","咖啡廳","美食探店","旅行攝影","K-pop","日劇","韓劇","音樂劇","演唱會","戶外活動"] },
+        5: { title: "價值觀", tags: ["重視家庭","孝順","善良","樂觀積極","幽默","追求成長","平衡生活","環保","動物友善","正能量","財務獨立","成熟穩重","冒險精神","藝術感","閱讀習慣","時間管理佳","包容力強","情感豐富","感恩","尊重他人","有耐心","上進心","學習型人格"] },
+        6: { title: "感情觀", tags: ["認真交往","想結婚","長期穩定","專一","浪漫","溝通良好","互相支持","一起旅行","家庭優先","共同成長","接受異地","平等關係","寵男友","不玩曖昧","願意努力","規劃未來","情感細膩","會撒嬌","長期陪伴","結婚優先","享受當下","互相成就"] },
+        7: { title: "家庭與未來規劃", tags: ["想生小孩","不想要小孩","接受異地","重視家庭","一起旅行","長期同居","結婚優先","買房計劃","養寵物","家庭聚會","父母同住","獨立生活","未來規劃明確","共同理財","一起養小孩","支持對方事業"] }
+      },
+      neutral: {
+        2: { title: "外貌與身材", tags: ["高挑","長腿","可愛型","甜美","氣質","知性","清秀","陽光","成熟型","高顏值","笑容迷人","運動型","健壯","穿搭有型","乾淨清爽","模特兒身材","纖細","六塊肌","精緻五官","皮膚好","氣場強","戴眼鏡文青風","五官立體","比例佳"] },
+        3: { title: "學歷與事業", tags: ["全球百大","台灣頂尖","年收百萬以上","主管階級","醫師","工程師","公務員","高學歷","留學背景","穩定事業","財務規劃佳","創業者","教師","律師","金融業","科技業","碩士以上","有房","有車","夢幻企業"] },
+        4: { title: "興趣與生活方式", tags: ["愛旅行","健身","爬山","瑜伽","看書","看電影","追劇","音樂","攝影","烹飪","咖啡","美食","寵物","會開車","作息規律","露營","滑雪","衝浪","跑步","單車","游泳","桌遊","演唱會","閱讀","畫畫","手作","旅行攝影","美食探店","咖啡廳","早起健身"] },
+        5: { title: "價值觀", tags: ["重視家庭","孝順","責任感","樂觀積極","善良","幽默","追求成長","平衡生活","財務獨立","成熟穩重","冒險精神","正能量","環保","動物友善","誠實","忠誠","上進心","學習型人格","藝術感","閱讀習慣","時間管理佳","包容力強","感恩","尊重他人"] },
+        6: { title: "感情觀", tags: ["認真交往","想結婚","長期穩定","專一","浪漫","溝通良好","互相支持","一起旅行","家庭優先","共同成長","接受異地","平等關係","不玩曖昧","願意努力","規劃未來","情感細膩","長期陪伴","結婚優先","享受當下","互相成就","寵對方"] },
+        7: { title: "家庭與未來規劃", tags: ["想生小孩","不想要小孩","接受異地","重視家庭","一起旅行","長期同居","結婚優先","買房計劃","養寵物","家庭聚會","父母同住","獨立生活","未來規劃明確","共同理財","一起養小孩","支持對方事業"] }
+      }
+    };
+
+    const candidates = [
+      { id:1, photo:"1.jpg", age:23, height:178, job:"軟體工程師", traits:["運動型","成熟型","責任感","健身","穿搭有型","專一","想結婚","高挑","穩重","財務規劃佳","工程師","科技業"] },
+      { id:2, photo:"2.jpg", age:19, height:172, job:"高三生", traits:["可愛型","善良","害羞","學習型人格","孝順","樂觀積極","認真交往","專一","醫師"] },
+      { id:3, photo:"3.jpg", age:21, height:177, job:"大學生（資訊系）", traits:["知性","戴眼鏡文青風","閱讀習慣","追求成長","理性思考","平衡生活","幽默","共同成長","工程師"] },
+      { id:4, photo:"4.jpg", age:20, height:174, job:"大學生（體育系）", traits:["陽光","運動型","六塊肌","健壯","冒險精神","幽默","愛旅行","健身","浪漫","醫師"] },
+      { id:5, photo:"5.jpg", age:24, height:180, job:"行銷專員", traits:["氣質型男","穿搭有型","成熟型","創業者","追求成長","溝通良好","一起旅行","寵女友","主管"] }
+    ];
+
+    function toggleGender(btn) {
+      document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('border-pink-500', 'bg-pink-50'));
+      btn.classList.add('border-pink-500', 'bg-pink-50');
+      idealGender = btn.dataset.value;
+      currentCategories = genderCategories[idealGender === '男生' ? 'male' : idealGender === '女生' ? 'female' : 'neutral'];
+      if (currentStep >= 2) renderStep(currentStep);
+    }
+
+    function updateDualRange(id) {
+      const minInput = document.getElementById(id + 'Min');
+      const maxInput = document.getElementById(id + 'Max');
+      const fill = document.getElementById(id + 'Fill');
+      let minVal = parseInt(minInput.value);
+      let maxVal = parseInt(maxInput.value);
+      if (minVal > maxVal) minInput.value = maxVal;
+      const valueEl = document.getElementById(id + 'Value');
+      valueEl.textContent = `${minInput.value} - ${maxInput.value}`;
+      const range = maxInput.max - maxInput.min;
+      const left = ((minVal - maxInput.min) / range) * 100;
+      const width = ((maxVal - minVal) / range) * 100;
+      fill.style.left = `calc(12px + ${left}%)`;
+      fill.style.width = `${width}%`;
+    }
+
+    function renderStep(step) {
+      let html = '';
+      if (step === 1) {
+        html = `
+          <div class="step">
+            <div class="step-header flex justify-between items-center mb-8 pt-6">
+              <span class="text-pink-500 font-bold text-xl">步驟 1 / 7</span>
+            </div>
+            <h2 class="text-2xl font-semibold mb-6">基本條件</h2>
+            <div class="space-y-8">
+              <div>
+                <p class="text-sm text-gray-500 mb-2">想找的性別</p>
+                <div class="flex gap-3">
+                  <button onclick="toggleGender(this)" data-value="男生" class="gender-btn flex-1 py-4 rounded-2xl border-2 border-gray-200 text-center font-medium">男生</button>
+                  <button onclick="toggleGender(this)" data-value="女生" class="gender-btn flex-1 py-4 rounded-2xl border-2 border-gray-200 text-center font-medium">女生</button>
+                  <button onclick="toggleGender(this)" data-value="不限" class="gender-btn flex-1 py-4 rounded-2xl border-2 border-gray-200 text-center font-medium">不限</button>
+                </div>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500 mb-2">年齡範圍 <span id="ageValue" class="font-semibold text-pink-500">24 - 32</span> 歲</p>
+                <div class="dual-range">
+                  <div class="track-bg"></div>
+                  <div id="ageFill" class="track-fill"></div>
+                  <input type="range" min="18" max="45" value="24" id="ageMin" oninput="updateDualRange('age')">
+                  <input type="range" min="18" max="45" value="32" id="ageMax" oninput="updateDualRange('age')">
+                </div>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500 mb-2">身高範圍 <span id="heightValue" class="font-semibold text-pink-500">165 - 185</span> cm</p>
+                <div class="dual-range">
+                  <div class="track-bg"></div>
+                  <div id="heightFill" class="track-fill"></div>
+                  <input type="range" min="150" max="200" value="165" id="heightMin" oninput="updateDualRange('height')">
+                  <input type="range" min="150" max="200" value="185" id="heightMax" oninput="updateDualRange('height')">
+                </div>
+              </div>
+            </div>
+          </div>`;
+      } else if (step >= 2 && step <= 7) {
+        const cat = currentCategories[step];
+        html = `
+          <div class="step">
+            <div class="step-header flex justify-between items-center mb-8 pt-6">
+              <span class="text-pink-500 font-bold text-xl">步驟 ${step} / 7</span>
+              <span class="text-pink-500 text-sm font-medium bg-pink-50 px-3 py-1 rounded-3xl">${selectedTags.size} 個已選</span>
+            </div>
+            <h2 class="text-2xl font-semibold mb-6">${cat.title}</h2>
+            <div class="tag-container">
+              ${cat.tags.map(tag => `
+                <button onclick="toggleTag(this)" data-tag="${tag}" 
+                  class="tag ${selectedTags.has(tag) ? 'selected' : ''}">
+                  ${selectedTags.has(tag) ? '<i class="fa-solid fa-check"></i>' : ''}
+                  ${tag}
+                </button>
+              `).join('')}
+            </div>
+          </div>`;
+      }
+      document.getElementById('mainContent').innerHTML = html;
+      if (step === 1) {
+        setTimeout(() => { updateDualRange('age'); updateDualRange('height'); }, 10);
+      }
+    }
+
+    function toggleTag(btn) {
+      const tag = btn.dataset.tag;
+      if (selectedTags.has(tag)) selectedTags.delete(tag);
+      else selectedTags.add(tag);
+      renderStep(currentStep);
+    }
+
+    function nextStep() {
+      if (currentStep < 7) {
+        currentStep++;
+        renderStep(currentStep);
+      } else finish();
+    }
+
+    function prevStep() {
+      if (currentStep > 1) {
+        currentStep--;
+        renderStep(currentStep);
+      }
+    }
+
+    // 加強版配對邏輯（增加隨機性 + 更好符合標籤 + 更多職業匹配）
+    function matchBestCandidate() {
+      const userTags = Array.from(selectedTags);
+      let scores = [];
+
+      candidates.forEach(candidate => {
+        let score = 5; // 基礎分數，讓隨機性更高
+        userTags.forEach(tag => {
+          if (candidate.traits.includes(tag)) {
+            score += 4; // 標籤匹配加分
+            if (tag.includes("醫師") || tag.includes("工程師") || tag.includes("主管") || tag.includes("創業者")) score += 10; // 職業標籤大幅加權
+          }
+        });
+        if ((idealGender === '男生' && candidate.gender === 'male') ||
+            (idealGender === '女生' && candidate.gender === 'female')) score += 6;
+        scores.push({candidate, score});
+      });
+
+      // 加權隨機，讓五個人出現機會更均衡
+      const total = scores.reduce((sum, item) => sum + Math.max(item.score, 1), 0);
+      let rand = Math.random() * total;
+
+      for (let item of scores) {
+        rand -= Math.max(item.score, 1);
+        if (rand <= 0) return item.candidate;
+      }
+      return scores[Math.floor(Math.random() * scores.length)].candidate; // 保底隨機
+    }
+
+    function finish() {
+      const ageMin = document.getElementById('ageMin') ? document.getElementById('ageMin').value : 24;
+      const ageMax = document.getElementById('ageMax') ? document.getElementById('ageMax').value : 32;
+      const heightMin = document.getElementById('heightMin') ? document.getElementById('heightMin').value : 165;
+      const heightMax = document.getElementById('heightMax') ? document.getElementById('heightMax').value : 185;
+
+      const matched = matchBestCandidate();
+
+      const summaryHTML = `
+        <div class="text-center py-8">
+          <i class="fa-solid fa-heart text-7xl text-pink-500 mb-4"></i>
+          <h2 class="text-3xl font-bold mb-2">為你找到最匹配的人！</h2>
+          <p class="text-gray-500 mb-8">根據你的理想型標籤，系統推薦以下對象</p>
+
+          <div class="bg-gray-50 rounded-3xl p-6 text-left mb-8">
+            <p class="font-medium mb-3">你的條件</p>
+            <p>性別：${idealGender}</p>
+            <p>年齡：${ageMin}～${ageMax} 歲</p>
+            <p>身高：${heightMin}～${heightMax} cm</p>
+            <p class="font-medium mt-6 mb-3">已選標籤（${selectedTags.size} 個）</p>
+            <div class="flex flex-wrap gap-2">
+              ${Array.from(selectedTags).map(tag => `<span class="px-4 py-1 bg-pink-100 text-pink-600 text-sm rounded-3xl">${tag}</span>`).join('')}
+            </div>
+          </div>
+
+          <div class="match-card">
+            <div class="flex justify-center mb-6">
+              <img src="${matched.photo}" class="avatar-img blur-xl" id="matchedPhoto" onclick="this.classList.remove('blur-xl')" alt="配對照片">
+            </div>
+            <p class="text-center text-pink-600 mb-6">${matched.age} 歲 • ${matched.height} cm • ${matched.job}</p>
+            <p class="text-center text-gray-600 mb-8">配對分數最高的人！</p>
+          </div>
+
+          <button onclick="location.reload()" class="mt-8 w-full py-5 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-3xl font-semibold text-xl">
+            重新打造理想型
+          </button>
+        </div>`;
+
+      document.getElementById('mainContent').innerHTML = summaryHTML;
+    }
+
+    window.onload = () => {
+      currentCategories = genderCategories.neutral;
+      renderStep(1);
+    };
+  </script>
 </body>
 </html>
